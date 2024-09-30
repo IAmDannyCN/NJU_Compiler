@@ -1,5 +1,13 @@
 %{
+    #include "syntax.tab.h"
+    #include "syntaxtree.h"
     int yycolumn = 1;
+    int lex_error = 0;
+    #define YY_USER_ACTION \
+            yylloc.first_line = yylloc.last_line = yylineno; \
+            yylloc.first_column = yycolumn; \
+            yylloc.last_column = yycolumn + yyleng - 1; \
+            yycolumn += yyleng;
 %}
 
 %option yylineno
@@ -37,65 +45,138 @@ WHILE "while"
 SPACE " "|"\t"|"\r"
 NLINE "\n"
 
+LCOM "/*"
+OCOM "//"
+RCOM "*/"
+
 %%
+
 {NLINE} { yycolumn = 1; }
 
-{SPACE} { printf("SPACE %s\n", yytext); }
+{SPACE} { /*printf("SPACE %s\n", yytext);*/ }
 
-{INT}   { printf("INT %s\n", yytext); }
+{OCOM}  { while(input() != '\n') ; }
 
-{FLOAT} { printf("FLOAT %s\n", yytext); }
+{LCOM}  { char _iad_last_char = input(), _iad_this_char;
+          while(_iad_this_char = input()) {
+              if(_iad_last_char == '*' && _iad_this_char == '/') {
+                  break;
+              }
+              _iad_last_char = _iad_this_char;
+          } }
 
-{SEMI} { printf("SEMI %s\n", yytext); }
+{RCOM}  { printf("Error type A at Line %d: Mysterious characters \'%s\'\n", yylineno, yytext);
+          lex_error = 1; }
 
-{COMMA} { printf("COMMA %s\n", yytext); }
+{INT}   { /*printf("INT %s\n", yytext);*/
+          yylval.type_node = Constructor("INT", yytext, TYPE_TERMINAL, yylineno); 
+          return INT; }
 
-{ASSIGNOP} { printf("ASSIGNOP %s\n", yytext); }
+{FLOAT} { /*printf("FLOAT %s\n", yytext);*/
+          yylval.type_node = Constructor("FLOAT", yytext, TYPE_TERMINAL, yylineno); 
+          return FLOAT; }
 
-{RELOP} { printf("RELOP %s\n", yytext); }
+{SEMI}  { /*printf("SEMI %s\n", yytext);*/
+          yylval.type_node = Constructor("SEMI", "\0", TYPE_TERMINAL, yylineno); 
+          return SEMI; }
 
-{PLUS} { printf("PLUS %s\n", yytext); }
+{COMMA} { /*printf("COMMA %s\n", yytext);*/
+          yylval.type_node = Constructor("COMMA", "\0", TYPE_TERMINAL, yylineno); 
+          return COMMA; }
 
-{MINUS} { printf("MINUS %s\n", yytext); }
+{ASSIGNOP}  { /*printf("ASSIGNOP %s\n", yytext);*/
+          yylval.type_node = Constructor("ASSIGNOP", "\0", TYPE_TERMINAL, yylineno); 
+          return ASSIGNOP; }
 
-{STAR} { printf("STAR %s\n", yytext); }
+{RELOP} { /*printf("RELOP %s\n", yytext);*/
+          yylval.type_node = Constructor("RELOP", "\0", TYPE_TERMINAL, yylineno); 
+          return RELOP; }
 
-{DIV} { printf("DIV %s\n", yytext); }
+{PLUS}  { /*printf("PLUS %s\n", yytext);*/
+          yylval.type_node = Constructor("PLUS", "\0", TYPE_TERMINAL, yylineno); 
+          return PLUS; }
 
-{AND} { printf("AND %s\n", yytext); }
+{MINUS} { /*printf("MINUS %s\n", yytext);*/
+          yylval.type_node = Constructor("MINUS", "\0", TYPE_TERMINAL, yylineno); 
+          return MINUS; }
 
-{OR} { printf("OR %s\n", yytext); }
+{STAR}  { /*printf("STAR %s\n", yytext);*/
+          yylval.type_node = Constructor("STAR", "\0", TYPE_TERMINAL, yylineno); 
+          return STAR; }
 
-{DOT} { printf("DOT %s\n", yytext); }
+{DIV}   { /*printf("DIV %s\n", yytext);*/
+          yylval.type_node = Constructor("DIV", "\0", TYPE_TERMINAL, yylineno); 
+          return DIV; }
 
-{NOT} { printf("NOT %s\n", yytext); }
+{AND}   { /*printf("AND %s\n", yytext);*/
+          yylval.type_node = Constructor("AND", "\0", TYPE_TERMINAL, yylineno); 
+          return AND; }
 
-{TYPE} { printf("TYPE %s\n", yytext); }
+{OR}    { /*printf("OR %s\n", yytext);*/
+          yylval.type_node = Constructor("OR", "\0", TYPE_TERMINAL, yylineno); 
+          return OR; }
 
-{LP} { printf("LP %s\n", yytext); }
+{DOT}   { /*printf("DOT %s\n", yytext);*/
+          yylval.type_node = Constructor("DOT", "\0", TYPE_TERMINAL, yylineno); 
+          return DOT; }
 
-{RP} { printf("RP %s\n", yytext); }
+{NOT}   { /*printf("NOT %s\n", yytext);*/
+          yylval.type_node = Constructor("NOT", "\0", TYPE_TERMINAL, yylineno); 
+          return NOT; }
 
-{LB} { printf("LB %s\n", yytext); }
+{TYPE}  { /*printf("TYPE %s\n", yytext);*/
+          yylval.type_node = Constructor("TYPE", yytext, TYPE_TERMINAL, yylineno); 
+          return TYPE; }
 
-{RB} { printf("RB %s\n", yytext); }
+{LP}    { /*printf("LP %s\n", yytext);*/
+          yylval.type_node = Constructor("LP", "\0", TYPE_TERMINAL, yylineno); 
+          return LP; }
 
-{LC} { printf("LC %s\n", yytext); }
+{RP}    { /*printf("RP %s\n", yytext);*/
+          yylval.type_node = Constructor("RP", "\0", TYPE_TERMINAL, yylineno); 
+          return RP; }
 
-{RC} { printf("RC %s\n", yytext); }
+{LB}    { /*printf("LB %s\n", yytext);*/
+          yylval.type_node = Constructor("LB", "\0", TYPE_TERMINAL, yylineno); 
+          return LB; }
 
-{STRUCT} { printf("STRUCT %s\n", yytext); }
+{RB}    { /*printf("RB %s\n", yytext);*/
+          yylval.type_node = Constructor("RB", "\0", TYPE_TERMINAL, yylineno); 
+          return RB; }
 
-{RETURN} { printf("RETURN %s\n", yytext); }
+{LC}    { /*printf("LC %s\n", yytext);*/
+          yylval.type_node = Constructor("LC", "\0", TYPE_TERMINAL, yylineno); 
+          return LC; }
 
-{IF} { printf("IF %s\n", yytext); }
+{RC}    { /*printf("RC %s\n", yytext);*/
+          yylval.type_node = Constructor("RC", "\0", TYPE_TERMINAL, yylineno); 
+          return RC; }
 
-{ELSE} { printf("ELSE %s\n", yytext); }
+{STRUCT}    { /*printf("STRUCT %s\n", yytext);*/
+          yylval.type_node = Constructor("STRUCT", "\0", TYPE_TERMINAL, yylineno); 
+          return STRUCT; }
 
-{WHILE} { printf("WHILE %s\n", yytext); }
+{RETURN}    { /*printf("RETURN %s\n", yytext);*/
+          yylval.type_node = Constructor("RETURN", "\0", TYPE_TERMINAL, yylineno); 
+          return RETURN; }
 
-{ID} { printf("ID %s\n", yytext);}
+{IF}    { /*printf("IF %s\n", yytext);*/
+          yylval.type_node = Constructor("IF", "\0", TYPE_TERMINAL, yylineno); 
+          return IF; }
 
-. { printf("Error type A at Line %d: Mysterious characters \'%s\'\n", yylineno, yytext); }
+{ELSE}  { /*printf("ELSE %s\n", yytext);*/
+          yylval.type_node = Constructor("ELSE", "\0", TYPE_TERMINAL, yylineno); 
+          return ELSE; }
+
+{WHILE} { /*printf("WHILE %s\n", yytext);*/
+          yylval.type_node = Constructor("WHILE", "\0", TYPE_TERMINAL, yylineno); 
+          return WHILE; }
+
+{ID}    { /*printf("ID %s\n", yytext);*/ 
+          yylval.type_node = Constructor("ID", yytext, TYPE_TERMINAL, yylineno); 
+          return ID;}
+
+. { printf("Error type A at Line %d: Mysterious characters \'%s\'\n", yylineno, yytext);
+    lex_error = 1; }
 
 %%
