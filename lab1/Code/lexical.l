@@ -1,10 +1,5 @@
 %{
     int yycolumn = 1;
-    #define YY_USER_ACTION \
-            yylloc.first_line = yylloc.last_line = yylineno; \
-            yylloc.first_column = yycolumn; \
-            yylloc.last_column = yycolumn + yyleng - 1; \
-            yycolumn += yyleng;
 %}
 
 %option yylineno
@@ -44,15 +39,15 @@ IF if
 ELSE else
 WHILE while
 
-SPACE \n|\t
+SPACE \n| |\t|\r
 
 %%
 \n      {yycolumn = 1;}
 
 {SPACE} { printf("SPACE\n");}
 
-{COMMA} { printf("COMMA\n"); return COMMA;}
+{COMMA} { printf("COMMA\n");}
 
-{INT}   { printf("COMMA\n"); return COMMA;}
+{INT}   { printf("INT\n");}
 
 %%
