@@ -19,6 +19,19 @@
 
 %type <type_node> Program ExtDefList ExtDef ExtDecList Specifier StructSpecifier OptTag Tag VarDec FunDec VarList ParamDec CompSt StmtList Stmt DefList Def DecList Dec Exp Args
 
+%right ASSIGNOP
+%left OR AND
+%left RELOP
+%left PLUS MINUS
+%left STAR DIV
+%right NOT
+%left LP RP
+%left LB RB
+%left DOT
+
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
+
 %%
 
 Program : ExtDefList { $$ = Constructor("Program", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 1, $1); SetRoot($$); }
@@ -31,10 +44,12 @@ ExtDefList : ExtDef ExtDefList { $$ = Constructor("ExtDefList", "\0", TYPE_NONTE
 ExtDef : Specifier ExtDecList SEMI { $$ = Constructor("ExtDef", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 3, $1, $2, $3); }
     | Specifier SEMI { $$ = Constructor("ExtDef", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 2, $1, $2); }
     | Specifier FunDec CompSt{ $$ = Constructor("ExtDef", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 3, $1, $2, $3); }
+    | error SEMI { $$ = NULL; syntax_error = 1; }
     ;
 
 ExtDecList : VarDec { $$ = Constructor("ExtDecList", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 1, $1); }
     | VarDec COMMA ExtDecList { $$ = Constructor("ExtDecList", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 3, $1, $2, $3); }
+    | error COMMA { $$ = NULL; syntax_error = 1; }
     ;
 
 Specifier : TYPE { $$ = Constructor("Specifier", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 1, $1); }
@@ -54,20 +69,24 @@ Tag : ID { $$ = Constructor("Tag", "\0", TYPE_NONTERMINAL, @$.first_line); Build
 
 VarDec : ID { $$ = Constructor("VarDec", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 1, $1); }
     | VarDec LB INT RB { $$ = Constructor("VarDec", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 4, $1, $2, $3, $4); }
+    | error RB { $$ = NULL; syntax_error = 1; }
     ;
 
 FunDec : ID LP VarList RP { $$ = Constructor("FunDec", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 4, $1, $2, $3, $4); }
     | ID LP RP { $$ = Constructor("FunDec", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 3, $1, $2, $3); }
+    | ID LP error RP { $$ = NULL; syntax_error = 1; }
     ;
 
 VarList : ParamDec COMMA VarList { $$ = Constructor("VarList", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 3, $1, $2, $3); }
     | ParamDec { $$ = Constructor("VarList", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 1, $1); }
+    | error COMMA { $$ = NULL; syntax_error = 1; }
     ;
 
 ParamDec : Specifier VarDec { $$ = Constructor("ParamDec", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 2, $1, $2); }
     ;
 
 CompSt : LC DefList StmtList RC { $$ = Constructor("CompSt", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 4, $1, $2, $3, $4); }
+    | error RC { $$ = NULL; syntax_error = 1; }
     ;
 
 StmtList : Stmt StmtList { $$ = Constructor("StmtList", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 2, $1, $2); }
@@ -77,9 +96,11 @@ StmtList : Stmt StmtList { $$ = Constructor("StmtList", "\0", TYPE_NONTERMINAL, 
 Stmt : Exp SEMI { $$ = Constructor("Stmt", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 2, $1, $2); }
     | CompSt { $$ = Constructor("Stmt", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 1, $1); }
     | RETURN Exp SEMI { $$ = Constructor("Stmt", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 3, $1, $2, $3); }
-    | IF LP Exp RP Stmt { $$ = Constructor("Stmt", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 5, $1, $2, $3, $4, $5); }
+    | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE { $$ = Constructor("Stmt", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 5, $1, $2, $3, $4, $5); }
     | IF LP Exp RP Stmt ELSE Stmt { $$ = Constructor("Stmt", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 7, $1, $2, $3, $4, $5, $6, $7); }
     | WHILE LP Exp RP Stmt { $$ = Constructor("Stmt", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 5, $1, $2, $3, $4, $5); }
+    | error SEMI { $$ = NULL; syntax_error = 1; }
+    | error RP { $$ = NULL; syntax_error = 1; }
     ;
 
 DefList : Def DefList { $$ = Constructor("DefList", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 2, $1, $2); }
@@ -87,6 +108,7 @@ DefList : Def DefList { $$ = Constructor("DefList", "\0", TYPE_NONTERMINAL, @$.f
     ;
 
 Def : Specifier DecList SEMI { $$ = Constructor("Def", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 3, $1, $2, $3); }
+    // | error SEMI { $$ = NULL; syntax_error = 1; }
     ;
 
 DecList : Dec { $$ = Constructor("DecList", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 1, $1); }
@@ -115,6 +137,9 @@ Exp : Exp ASSIGNOP Exp { $$ = Constructor("Exp", "\0", TYPE_NONTERMINAL, @$.firs
     | ID { $$ = Constructor("Exp", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 1, $1); }
     | INT { $$ = Constructor("Exp", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 1, $1); }
     | FLOAT { $$ = Constructor("Exp", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 1, $1); }
+    | LP error RP { $$ = NULL; syntax_error = 1; }
+    | ID LP error RP { $$ = NULL; syntax_error = 1; }
+    | Exp LB error RB { $$ = NULL; syntax_error = 1; }
     ;
 
 Args : Exp COMMA Args { $$ = Constructor("Args", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 3, $1, $2, $3); }

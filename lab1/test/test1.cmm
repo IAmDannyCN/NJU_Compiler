@@ -1,9 +1,7 @@
-struct Complex
-{
-    float real, image;
-};
-int main()
-{
-    struct Complex x;
-    y.image = 3.5;
+int main() {
+    // a *********** adskja
+    int a /* kk ]]]]]]]]]]*/= 1;
+    int b[3];
+    b[1] = aa;
+    // /*abc/**/abc*/
 }
