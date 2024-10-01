@@ -17,6 +17,11 @@ typedef struct Node {
     struct Node* fa;
     struct Node* next;
     struct Node* son;
+
+    union {
+        unsigned int int_value;
+        float float_value;
+    };
     /*
     [<fa>]
      |

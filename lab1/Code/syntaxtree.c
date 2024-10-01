@@ -18,6 +18,15 @@ Node* Constructor(char *lex_name, char *content, int type, int line) {
     node->type = type;
     node->line = line;
     node->fa = node->son = node->next = NULL;
+
+    if(!strcmp(lex_name, "FLOAT")) {
+        sscanf(content, "%f", &(node->float_value));
+    } else if (!strcmp(lex_name, "INT")) {
+        sscanf(content, "%u", &(node->int_value));
+    }
+    // printf("------------------\n");
+    // OutPutTree(node, 0);
+    // printf("------------------\n");
     return node;
 }
 
@@ -55,9 +64,9 @@ void OutPutTree(Node* node, int depth) {
         } else if (!strcmp(node->lex_name, "TYPE")) {
             printf("TYPE: %s\n", node->content);
         } else if (!strcmp(node->lex_name, "INT")) {
-            printf("INT: %s\n", node->content);
+            printf("INT: %u\n", node->int_value);
         } else if (!strcmp(node->lex_name, "FLOAT")) {
-            printf("FLOAT: %s\n", node->content);
+            printf("FLOAT: %f\n", node->float_value);
         } else {
             printf("%s\n", node->lex_name);
         }

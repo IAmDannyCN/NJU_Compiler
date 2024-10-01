@@ -47,7 +47,6 @@ NLINE "\n"
 
 LCOM "/*"
 OCOM "//"
-RCOM "*/"
 
 %%
 
@@ -58,15 +57,18 @@ RCOM "*/"
 {OCOM}  { while(input() != '\n') ; }
 
 {LCOM}  { char _iad_last_char = input(), _iad_this_char;
-          while(_iad_this_char = input()) {
-              if(_iad_last_char == '*' && _iad_this_char == '/') {
-                  break;
-              }
-              _iad_last_char = _iad_this_char;
-          } }
-
-{RCOM}  { printf("Error type A at Line %d: Mysterious characters \'%s\'\n", yylineno, yytext);
-          lex_error = 1; }
+            while(1) {
+                _iad_this_char = input();
+                if(_iad_last_char == '*' && _iad_this_char == '/') {
+                    break;
+                }
+                _iad_last_char = _iad_this_char;
+                if(_iad_last_char == '\0' || _iad_last_char == EOF) {
+                    printf("Error type A at Line %d: Missing \'*/\'\n", yylineno);
+                    lex_error = 1;
+                    break;
+                }
+            } }
 
 {INT}   { /*printf("INT %s\n", yytext);*/
           yylval.type_node = Constructor("INT", yytext, TYPE_TERMINAL, yylineno); 
@@ -177,6 +179,6 @@ RCOM "*/"
           return ID;}
 
 . { printf("Error type A at Line %d: Mysterious characters \'%s\'\n", yylineno, yytext);
-    lex_error = 1; }
+    lex_error = 1;}
 
 %%
