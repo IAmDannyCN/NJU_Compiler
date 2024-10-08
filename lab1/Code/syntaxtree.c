@@ -24,9 +24,7 @@ Node* Constructor(char *lex_name, char *content, int type, int line) {
     } else if (!strcmp(lex_name, "INT")) {
         sscanf(content, "%u", &(node->int_value));
     }
-    // printf("------------------\n");
-    // OutPutTree(node, 0);
-    // printf("------------------\n");
+
     return node;
 }
 

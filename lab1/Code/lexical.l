@@ -3,6 +3,7 @@
     #include "syntaxtree.h"
     int yycolumn = 1;
     int lex_error = 0;
+    bool haserror[10000] = {0};
     #define YY_USER_ACTION \
             yylloc.first_line = yylloc.last_line = yylineno; \
             yylloc.first_column = yycolumn; \
@@ -179,6 +180,7 @@ OCOM "//"
           return ID;}
 
 . { printf("Error type A at Line %d: Mysterious characters \'%s\'\n", yylineno, yytext);
-    lex_error = 1;}
+    haserror[yylineno] = 1;
+    lex_error = 1; }
 
 %%

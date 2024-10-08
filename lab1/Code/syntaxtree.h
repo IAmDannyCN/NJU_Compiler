@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #define TYPE_NONTERMINAL 0x01
 #define TYPE_TERMINAL 0x02
