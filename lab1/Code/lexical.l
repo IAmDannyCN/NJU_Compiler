@@ -16,7 +16,7 @@ DIGIT [0-9]
 LETTER [a-zA-Z]
 
 INT 0|([1-9][0-9]*)
-FLOAT {DIGIT}+"."{DIGIT}+
+FLOAT {INT}+"."{DIGIT}+
 ID (_|{LETTER})(_|{LETTER}|{DIGIT})*
 SEMI ";"
 COMMA ","
