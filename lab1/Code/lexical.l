@@ -16,7 +16,8 @@ DIGIT [0-9]
 LETTER [a-zA-Z]
 
 INT 0|([1-9][0-9]*)
-FLOAT {INT}+"."{DIGIT}+
+FLOAT {INT}"."{DIGIT}+
+FLOATDOT {INT}"."
 ID (_|{LETTER})(_|{LETTER}|{DIGIT})*
 SEMI ";"
 COMMA ","
@@ -67,17 +68,22 @@ OCOM "//"
                 if(_iad_last_char == '\0' || _iad_last_char == EOF) {
                     printf("Error type A at Line %d: Missing \'*/\'\n", yylineno);
                     lex_error = 1;
+                    haserror[yylineno] = 1;
                     break;
                 }
             } }
 
-{INT}   { /*printf("INT %s\n", yytext);*/
-          yylval.type_node = Constructor("INT", yytext, TYPE_TERMINAL, yylineno); 
-          return INT; }
-
 {FLOAT} { /*printf("FLOAT %s\n", yytext);*/
           yylval.type_node = Constructor("FLOAT", yytext, TYPE_TERMINAL, yylineno); 
           return FLOAT; }
+
+{FLOATDOT}  { printf("Error type A at Line %d: Mysterious characters \'%s\'\n", yylineno, yytext);
+    haserror[yylineno] = 1;
+    lex_error = 1; }
+
+{INT}   { /*printf("INT %s\n", yytext);*/
+          yylval.type_node = Constructor("INT", yytext, TYPE_TERMINAL, yylineno); 
+          return INT; }
 
 {SEMI}  { /*printf("SEMI %s\n", yytext);*/
           yylval.type_node = Constructor("SEMI", "\0", TYPE_TERMINAL, yylineno); 
