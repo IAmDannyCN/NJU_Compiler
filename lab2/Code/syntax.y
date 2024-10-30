@@ -173,24 +173,6 @@ Args : Exp COMMA Args { $$ = Constructor("Args", "\0", TYPE_NONTERMINAL, @$.firs
 
 %%
 
-int main(int argc, char **argv) {
-    if(argc <= 1) {
-        return 1;
-    }
-    FILE * f = fopen(argv[1], "r");
-    if(!f) {
-        perror(argv[1]);
-        return 1;
-    }
-    yyrestart(f);
-    // yydebug = 1;
-    yyparse();
-    if(!lex_error && !syntax_error) {
-        OutPutTree(root, 0);
-    }
-    return 0;
-}
-
 int yyerror(char *msg) {
     if(!haserror[yylineno]) {
         printf("Error type B at Line %d: %s.\n", yylineno, msg);
