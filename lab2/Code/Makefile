@@ -27,7 +27,7 @@ syntax-c: $(YFILE)
 -include $(patsubst %.o, %.d, $(OBJS))
 
 # 定义的一些伪目标
-.PHONY: clean test
+.PHONY: clean test test_symbol
 test:
 	./parser ../Test/test1.cmm
 clean:
@@ -35,3 +35,5 @@ clean:
 	rm -f $(OBJS) $(OBJS:.o=.d)
 	rm -f $(LFC) $(YFC) $(YFC:.c=.h)
 	rm -f *~
+test_symbol:
+	gcc -o test_symbol symboltable.c test_symboltable.iad

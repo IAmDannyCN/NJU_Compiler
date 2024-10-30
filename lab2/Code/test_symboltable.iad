@@ -1,0 +1,31 @@
+#include "symboltable.h"
+
+int main() {
+
+    Type* ty_int = getTypeInt(); ty_int->name = "ty_int";
+    Type* ty_float = getTypeFloat(); ty_float->name = "ty_float";
+
+    Type* ty_intarray = getTypeArray(ty_int, 10); ty_intarray->name = "ty_intarray";
+    Type* ty_floatarray = getTypeArray(ty_float, 10); ty_floatarray->name = "ty_floatarray";
+    Type* ty_int2Darray = getTypeArray(ty_intarray, 5); ty_int2Darray->name = "ty_int2Darray";
+
+    Type* ty_anonstruct = getTypeStruct("<anonymous>");
+    addFieldListToTypeStruct(ty_anonstruct, getFieldList(ty_intarray));
+    addFieldListToTypeStruct(ty_anonstruct, getFieldList(ty_float));
+
+    Type* ty_struct = getTypeStruct("Student");
+    addFieldListToTypeStruct(ty_struct, getFieldList(ty_int2Darray));
+    addFieldListToTypeStruct(ty_struct, getFieldList(ty_anonstruct));
+    addFieldListToTypeStruct(ty_struct, getFieldList(ty_int));
+
+    Type* ty_struct2 = getTypeStruct("Student2");
+    addFieldListToTypeStruct(ty_struct2, getFieldList(ty_int2Darray));
+    addFieldListToTypeStruct(ty_struct2, getFieldList(ty_anonstruct));
+    addFieldListToTypeStruct(ty_struct2, getFieldList(ty_int));
+
+    assert(isSameType(ty_struct, ty_struct2));
+    assert(!isSameType(ty_struct, ty_anonstruct));
+    OutputType(ty_struct, 0);
+
+    return 0;
+}

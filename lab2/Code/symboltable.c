@@ -34,7 +34,7 @@ Type* getTypeFloat() {
 }
 
 // array
-Type* concatArrayLeft(Type* typeRight, int size) {
+Type* getTypeArray(Type* typeRight, int size) {
     Type* cur = malloc(sizeof(Type));
     cur->kind = ARRAY;
     cur->size = size;
@@ -103,7 +103,7 @@ void insertSymbol(Type* ty) {
     symbolTable[hashid] = ty;
 }
 void insertFunc(Function* func) {
-    unsigned int hashid = func->name;
+    unsigned int hashid = hash(func->name);
     assert(funcTable[hashid] == NULL);
     funcTable[hashid] = func;
 }
@@ -117,7 +117,7 @@ Type* queryStruct(char* name) {
     unsigned int hashid = hash(name);
     return structTable[hashid];
 }
-Func* queryFunc(char* name) {
+Function* queryFunc(char* name) {
     unsigned int hashid = hash(name);
     return funcTable[hashid];
 }
@@ -164,3 +164,38 @@ bool isMatchFuncArg(Function* funcx, Function* funcy) {
     }
     return true;
 }
+
+// DEBUG
+void OutputType(Type* ty, int depth) {
+    char *line_prefix = malloc(depth * 4 + 1);
+    for(int i = 0; i < depth * 4; i++) {
+        line_prefix[i] = ' ';
+    }
+    line_prefix[depth * 4] = 0;
+    
+    printf("%s[%s] ", line_prefix, ty->name);
+    char *msg[3] = {"BASIC", "ARRAY", "STRUCT"};
+    printf("%s : ", msg[ty->kind]);
+
+    if(ty->kind == BASIC) {
+        char *msg_basic[2] = {"int", "float"};
+        printf("%s\n", msg_basic[ty->basic]);
+    } else if (ty->kind == ARRAY) {
+        printf("size=%d\n", ty->size);
+        printf("%sARRAY_TYPE:\n", line_prefix);
+        OutputType(ty->elem, depth + 1);
+    } else if (ty->kind == STRUCTURE) {
+        puts("");
+        FieldList* cur = ty->structure;
+        while(cur != NULL) {
+            printf("%sSTRUCT_FIELD:\n", line_prefix);
+            OutputType(cur->type, depth + 1);
+            cur = cur->next;
+        }
+    } else {
+        printf("Invalid ty->kind: %d\n", ty->kind);
+    }
+}
+// void OutputFunction(Function* func) {
+
+// }

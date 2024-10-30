@@ -3,7 +3,9 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <assert.h>
+#include <stdio.h>
 
 typedef struct Type Type;
 typedef struct FieldList FieldList;
@@ -43,11 +45,11 @@ Type* getTypeInt();
 Type* getTypeFloat();
 
 // array
-Type* concatArrayLeft(Type* typeRight, int size);
+Type* getTypeArray(Type* typeRight, int size);
 
 // struct
 Type* getTypeStruct(char* name);
-FieldList* getFieldList(char* name, Type* type);
+FieldList* getFieldList(Type* type);
 void addFieldListToTypeStruct(Type* tyStruct, FieldList* fieldList);
 
 // function
@@ -64,8 +66,12 @@ void insertFunc(Function* func);
 // QUERY
 Type* querySymbol(char* name);
 Type* queryStruct(char* name);
-Func* queryFunc(char* name);
+Function* queryFunc(char* name);
 bool isSameType(Type* x, Type* y);
 bool isMatchFuncArg(Function* funcx, Function* funcy);
+
+// DEBUG
+void OutputType(Type* ty, int depth);
+// void OutputFunction(Function* func);
 
 #endif

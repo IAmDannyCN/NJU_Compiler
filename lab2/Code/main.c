@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "syntaxtree.h"
 #include "syntax.tab.h"
+#include "symboltable.h"
 
 extern int lex_error, syntax_error;
 extern void yyrestart(FILE * f);
