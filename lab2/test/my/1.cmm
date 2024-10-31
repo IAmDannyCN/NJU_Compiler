@@ -1,0 +1,23 @@
+struct TEST {
+    int a;
+    int b[4];
+    struct TEST2{
+        int c;
+        float d[100][10];
+    } x;
+} t;
+
+int main() {
+    struct TEST u;
+    struct TEST2 v;
+    struct {
+        int a;
+        int b[4];
+        struct TEST3{
+            int c;
+            float d[100][10];
+        } x;
+    } uu;
+    u = uu;
+    return 0;
+}

@@ -14,11 +14,6 @@ unsigned int hash(char* name) {
 }
 
 // CONSTRUCT
-// name for basic and array
-void setTypeName(Type* cur, char* name) {
-    cur->name = name;
-}
-
 // basic type
 Type* getTypeInt() {
     Type* cur = malloc(sizeof(Type));
@@ -43,17 +38,17 @@ Type* getTypeArray(Type* typeRight, int size) {
 }
 
 // struct
-Type* getTypeStruct(char* name) {
+Type* getTypeStruct() {
     Type* cur = malloc(sizeof(Type));
     cur->kind = STRUCTURE;
     cur->structure = NULL;
     cur->tail = NULL;
-    cur->name = name;
     return cur;
 }
-FieldList* getFieldList(Type* type) {
+FieldList* getFieldList(char* name, Type* type) {
     FieldList* cur = malloc(sizeof(FieldList));
     cur->type = type;
+    cur->name = name;
     cur->next = NULL;
 }
 void addFieldListToTypeStruct(Type* tyStruct, FieldList* fieldList) {
@@ -92,13 +87,13 @@ void addFunctionArgToFunc(Function* func, FunctionArg* arg) {
 }
 
 // INSERT
-void insertStruct(Type* ty) {
-    unsigned int hashid = hash(ty->name);
+void insertStruct(char* name, Type* ty) {
+    unsigned int hashid = hash(name);
     assert(structTable[hashid] == NULL);
     structTable[hashid] = ty;
 }
-void insertSymbol(Type* ty) {
-    unsigned int hashid = hash(ty->name);
+void insertSymbol(char* name, Type* ty) {
+    unsigned int hashid = hash(name);
     assert(symbolTable[hashid] == NULL);
     symbolTable[hashid] = ty;
 }
@@ -122,6 +117,9 @@ Function* queryFunc(char* name) {
     return funcTable[hashid];
 }
 bool isSameType(Type* x, Type* y) {
+    if(x == NULL || y == NULL) {
+        return false;
+    }
     if(x->kind != y->kind) {
         return false;
     }
@@ -129,7 +127,7 @@ bool isSameType(Type* x, Type* y) {
         return x->basic == y->basic;
     }
     if(x->kind == ARRAY) {
-        return (x->size == y->size) && (isSameType(x->elem, y->elem));
+        return isSameType(x->elem, y->elem);
     }
     // x->kind == STRUCTURE
     FieldList* nodex = x->structure;
@@ -147,6 +145,10 @@ bool isSameType(Type* x, Type* y) {
         nodex = nodex->next;
         nodey = nodey->next;
     }
+    return true;
+}
+bool checkLeftValue(Type* ty){
+    // TODO
     return true;
 }
 bool isMatchFuncArg(Function* funcx, Function* funcy) {
@@ -167,13 +169,16 @@ bool isMatchFuncArg(Function* funcx, Function* funcy) {
 
 // DEBUG
 void OutputType(Type* ty, int depth) {
+    if(ty == NULL) {
+        return ;
+    }
     char *line_prefix = malloc(depth * 4 + 1);
     for(int i = 0; i < depth * 4; i++) {
         line_prefix[i] = ' ';
     }
     line_prefix[depth * 4] = 0;
     
-    printf("%s[%s] ", line_prefix, ty->name);
+    printf("%s", line_prefix);
     char *msg[3] = {"BASIC", "ARRAY", "STRUCT"};
     printf("%s : ", msg[ty->kind]);
 

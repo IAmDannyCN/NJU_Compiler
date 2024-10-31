@@ -1,7 +1,8 @@
 struct Position
 {
     float x, y;
-}
+};
+
 int main()
 {
     struct Position p;

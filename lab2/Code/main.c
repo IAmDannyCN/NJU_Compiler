@@ -2,6 +2,7 @@
 #include "syntaxtree.h"
 #include "syntax.tab.h"
 #include "symboltable.h"
+#include "semantic.h"
 
 extern int lex_error, syntax_error;
 extern void yyrestart(FILE * f);
@@ -20,7 +21,8 @@ int main(int argc, char **argv) {
     // yydebug = 1;
     yyparse();
     if(!lex_error && !syntax_error) {
-        OutPutTree(root, 0);
+        // OutPutTree(root, 0);
+        ExtDefList(root->son);
     }
     return 0;
 }

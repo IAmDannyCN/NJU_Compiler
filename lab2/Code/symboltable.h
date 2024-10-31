@@ -24,6 +24,7 @@ struct Type {
 
 struct FieldList {
     Type* type;
+    char* name;
     FieldList* next;
 };
 
@@ -48,8 +49,9 @@ Type* getTypeFloat();
 Type* getTypeArray(Type* typeRight, int size);
 
 // struct
-Type* getTypeStruct(char* name);
-FieldList* getFieldList(Type* type);
+Type* getTypeStruct();
+bool haveFieldList();
+FieldList* getFieldList(char* name, Type* type);
 void addFieldListToTypeStruct(Type* tyStruct, FieldList* fieldList);
 
 // function
@@ -59,8 +61,8 @@ FunctionArg* getFunctionArg(Type* type);
 void addFunctionArgToFunc(Function* func, FunctionArg* arg);
 
 // INSERT
-void insertStruct(Type* ty);
-void insertSymbol(Type* ty);
+void insertStruct(char* name, Type* ty);
+void insertSymbol(char* name, Type* ty);
 void insertFunc(Function* func);
 
 // QUERY
@@ -68,6 +70,7 @@ Type* querySymbol(char* name);
 Type* queryStruct(char* name);
 Function* queryFunc(char* name);
 bool isSameType(Type* x, Type* y);
+bool checkLeftValue(Type* ty);
 bool isMatchFuncArg(Function* funcx, Function* funcy);
 
 // DEBUG
