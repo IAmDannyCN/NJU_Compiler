@@ -19,7 +19,6 @@ struct Type {
         struct { Type* elem; int size; }; // for ARRAY
         struct { FieldList* structure; FieldList* tail; }; // for STRUCTURE
     };
-    char* name;
 };
 
 struct FieldList {

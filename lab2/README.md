@@ -1,15 +1,13 @@
 ## Usage
 
-Compile lab 1 with `make` at `./Code`.
+Compile lab 2 with `make` at `./Code`, `parser` will be generated.
+
+Use `parser xxx.cmm` to run lex/syntax/semantic check for `xxx.cmm`.
 
 ## Update Log
 
-**2024.10.8**
+**2024.10.31**
 
-Lab 1 finished with report.
+Lab 2 finished with report.
 
-Score: 96/100.
-
-**2024.10.9**
-
-Lab 1 Accepted.
+Score: 100/100.

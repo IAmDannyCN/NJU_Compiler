@@ -466,7 +466,6 @@ Type* Exp(Node* node) {bug;
             printf("Error type 5 at line %d: Unmaching assignment.\n", node->line);
         }
         if(!checkLeftValue(node->son)) {
-            // TODO
             printf("Error type 6 at line %d: Assigning to a right value.\n", node->line);
         }
         return ty_exp1;
