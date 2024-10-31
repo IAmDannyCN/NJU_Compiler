@@ -1,7 +1,7 @@
 #include "semantic.h"
 
 // #define bug printf("> %s (%d) <%s, %d>\n", node->lex_name, node->line, __FUNCTION__, __LINE__)
-#define bug 1+1
+#define bug true
 
 Node* getSon(Node* node, char* name) {
     Node* cur = node->son;
@@ -12,6 +12,19 @@ Node* getSon(Node* node, char* name) {
         cur = cur->next;
     }
     return NULL;
+}
+
+bool checkLeftValue(Node* node){
+    if(!strcmp(node->son->lex_name, "ID") && node->son->next == NULL) {
+        return true;
+    }
+    if(getSon(node, "LB") != NULL) {
+        return checkLeftValue(node->son);
+    }
+    if(getSon(node, "DOT") != NULL) {
+        return checkLeftValue(node->son);
+    }
+    return false;
 }
 
 void ExtDefList(Node* node) {
@@ -452,7 +465,7 @@ Type* Exp(Node* node) {bug;
         if(!isSameType(ty_exp1, ty_exp2)) {
             printf("Error type 5 at line %d: Unmaching assignment.\n", node->line);
         }
-        if(!checkLeftValue(ty_exp1)) {
+        if(!checkLeftValue(node->son)) {
             // TODO
             printf("Error type 6 at line %d: Assigning to a right value.\n", node->line);
         }

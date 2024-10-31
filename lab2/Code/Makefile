@@ -35,5 +35,3 @@ clean:
 	rm -f $(OBJS) $(OBJS:.o=.d)
 	rm -f $(LFC) $(YFC) $(YFC:.c=.h)
 	rm -f *~
-test_symbol:
-	gcc -o test_symbol symboltable.c test_symboltable.iad

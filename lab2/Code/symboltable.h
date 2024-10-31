@@ -70,7 +70,6 @@ Type* querySymbol(char* name);
 Type* queryStruct(char* name);
 Function* queryFunc(char* name);
 bool isSameType(Type* x, Type* y);
-bool checkLeftValue(Type* ty);
 bool isMatchFuncArg(Function* funcx, Function* funcy);
 
 // DEBUG

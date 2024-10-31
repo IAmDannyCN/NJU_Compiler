@@ -44,6 +44,7 @@ ExtDef : Specifier ExtDecList SEMI { $$ = Constructor("ExtDef", "\0", TYPE_NONTE
     | Specifier SEMI { $$ = Constructor("ExtDef", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 2, $1, $2); }
     | Specifier FunDec CompSt{ $$ = Constructor("ExtDef", "\0", TYPE_NONTERMINAL, @$.first_line); BuildSon($$, 3, $1, $2, $3); }
     | error SEMI { $$ = NULL; syntax_error = 1; }
+    | Specifier FunDec error SEMI  { $$ = NULL; syntax_error = 1; }
     | Specifier error  { $$ = NULL; syntax_error = 1; }
     ;
 

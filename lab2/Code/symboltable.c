@@ -147,10 +147,6 @@ bool isSameType(Type* x, Type* y) {
     }
     return true;
 }
-bool checkLeftValue(Type* ty){
-    // TODO
-    return true;
-}
 bool isMatchFuncArg(Function* funcx, Function* funcy) {
     if(funcx->argc != funcy->argc) {
         return false;
