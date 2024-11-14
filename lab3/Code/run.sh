@@ -10,15 +10,15 @@ P=$1
 
 # Step 1: 运行 parser，并将输出重定向到 cur.asm
 echo "Running ./parser with parameter $P..."
-if ! ./parser "$P" > cur.asm; then
+if ! ./parser "$P" > cur.ir; then
   echo "Parser failed. Stopping script."
   exit 1
 fi
 
-# Step 2: 运行 qtspim
-echo "Running qtspim with cur.asm..."
-if ! qtspim cur.asm; then
-  echo "qtspim failed. Stopping script."
+# Step 2: 运行 irsim
+echo "Running irsim with cur.ir..."
+if ! irsim ./cur.ir; then
+  echo "irsim failed. Stopping script."
   exit 1
 fi
 
