@@ -29,11 +29,12 @@ Type* getTypeFloat() {
 }
 
 // array
-Type* getTypeArray(Type* typeRight, int size) {
+Type* getTypeArray(Type* typeRight, int size, int elem_size) {
     Type* cur = malloc(sizeof(Type));
     cur->kind = ARRAY;
     cur->size = size;
     cur->elem = typeRight;
+    cur->elem_size = elem_size;
     return cur;
 }
 

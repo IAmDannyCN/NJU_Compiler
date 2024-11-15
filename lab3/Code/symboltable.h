@@ -16,8 +16,8 @@ struct Type {
     enum { BASIC, ARRAY, STRUCTURE } kind;
     union {
         int basic; // for BASIC; 0 for int, 1 for float
-        struct { Type* elem; int size; }; // for ARRAY
-        struct { FieldList* structure; FieldList* tail; }; // for STRUCTURE
+        struct { Type* elem; int size; int elem_size; }; // for ARRAY
+        struct { FieldList* structure; FieldList* tail; int stru_size; }; // for STRUCTURE
     };
 };
 
@@ -25,6 +25,7 @@ struct FieldList {
     Type* type;
     char* name;
     FieldList* next;
+    int size, offset;
 };
 
 struct FunctionArg {
@@ -39,13 +40,16 @@ struct Function {
     FunctionArg* argv, *tail;
 };
 
+// utils
+unsigned int hash(char* name);
+
 // CONSTRUCT
 // basic type
 Type* getTypeInt();
 Type* getTypeFloat();
 
 // array
-Type* getTypeArray(Type* typeRight, int size);
+Type* getTypeArray(Type* typeRight, int size, int elem_size);
 
 // struct
 Type* getTypeStruct();

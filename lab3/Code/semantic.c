@@ -3,6 +3,19 @@
 // #define bug printf("> %s (%d) <%s, %d>\n", node->lex_name, node->line, __FUNCTION__, __LINE__)
 #define bug true
 
+int semantic_error;
+int has_array_as_param;
+
+void define_Lib_Func() {
+    Type* ty_int = getTypeInt();
+    Function* func_read = getFunc("read", ty_int);
+    Function* func_write = getFunc("write", ty_int);
+    FunctionArg* int_arg = getFunctionArg(ty_int);
+    addFunctionArgToFunc(func_write, int_arg);
+    insertFunc(func_read);
+    insertFunc(func_write);
+}
+
 Node* getSon(Node* node, char* name) {
     Node* cur = node->son;
     while(cur != NULL) {
@@ -12,6 +25,16 @@ Node* getSon(Node* node, char* name) {
         cur = cur->next;
     }
     return NULL;
+}
+
+int getTypeSize(Type* ty) {
+    if(ty->kind == BASIC) {
+        return 4;
+    } else if (ty->kind == ARRAY) {
+        return ty->size * ty->elem_size;
+    } else if (ty->kind == STRUCTURE) {
+        return ty->stru_size;
+    }
 }
 
 bool checkLeftValue(Node* node){
@@ -66,6 +89,7 @@ void ExtDef(Node* node) {bug;
         Function* func_test = queryFunc(func->name);
         if(func_test != NULL) {
             printf("Error type 4 at line %d: Redefined function \'%s\'\n", node->line, func->name);
+            semantic_error = 1;
         } else {
             insertFunc(func);
         }
@@ -104,6 +128,7 @@ Type* StructSpecifier(Node* node) {bug;
         Type* stru = queryStruct(name);
         if(stru == NULL) {
             printf("Error type 17 at line %d: Using undefined struct \'%s\'.\n", node->line, name);
+            semantic_error = 1;
         }
         return stru;
     }
@@ -122,10 +147,21 @@ Type* StructSpecifier(Node* node) {bug;
         Type* symb_test = querySymbol(name);
         if(stru_test != NULL || symb_test != NULL) {
             printf("Error type 16 at line %d: Redefined struct name \'%s\'.\n", node->line, name);
+            semantic_error = 1;
         } else {
             insertStruct(name, stru);
         }
     }
+    
+    FieldList* cur = stru->structure;
+    stru->stru_size = 0;
+    while(cur != NULL) {
+        cur->size = getTypeSize(cur->type);
+        cur->offset = stru->stru_size;
+        stru->stru_size += cur->size;
+        cur = cur->next;
+    }
+
     return stru;
 }
 
@@ -184,6 +220,7 @@ void Dec_Struct(Node* node, Type* stru, Type* ty) {bug; // ty might be NULL
 
     if(node_ASSIGNOP != NULL) {
         printf("Error type 15 at line %d: Assignment in struct definition.\n", node->line);
+        semantic_error = 1;
     } else {
         VarDec_Struct(node->son, stru, ty);
     }
@@ -199,7 +236,7 @@ void VarDec_Struct(Node* node, Type* stru, Type* ty) {bug; // ty might be NULL
     if(node_VarDec != NULL) {
         // VarDec - VarDec LB INT RB
         Node* node_INT = getSon(node, "INT");
-        VarDec_Struct(node_VarDec, stru, getTypeArray(ty, node_INT->int_value));
+        VarDec_Struct(node_VarDec, stru, getTypeArray(ty, node_INT->int_value, getTypeSize(ty)));
         return ;
     }
     // VarDec - ID
@@ -208,6 +245,7 @@ void VarDec_Struct(Node* node, Type* stru, Type* ty) {bug; // ty might be NULL
     while(cur != NULL) {
         if(!strcmp(cur->name, node_ID->content)) {
             printf("Error type 15 at line %d: Redefined field name \'%s\' in struct.\n", node->line, cur->name);
+            semantic_error = 1;
             return ;
         }
         cur = cur->next;
@@ -241,7 +279,7 @@ void VarDec(Node* node, Type* ty) {bug; // ty might be NULL
     if(node_VarDec != NULL) {
         // VarDec - VarDec LB INT RB
         Node* node_INT = getSon(node, "INT");
-        VarDec(node_VarDec, getTypeArray(ty, node_INT->int_value));
+        VarDec(node_VarDec, getTypeArray(ty, node_INT->int_value, getTypeSize(ty)));
         return ;
     }
     // VarDec - ID
@@ -251,6 +289,7 @@ void VarDec(Node* node, Type* ty) {bug; // ty might be NULL
     Type* symb_test = querySymbol(name);
     if(stru_test != NULL || symb_test != NULL) {
         printf("Error type 3 at line %d: Redefined variable name \'%s\'.\n", node->line, name);
+        semantic_error = 1;
     } else {
         insertSymbol(name, ty);
     }
@@ -298,6 +337,9 @@ void ParamDec(Node* node, Function* func) {bug;
 
     Type* ty = VarDec_Func(node_VarDec, Specifier(node_Specifier));
     addFunctionArgToFunc(func, getFunctionArg(ty));
+    if(ty->kind == ARRAY) {
+        has_array_as_param = 1;
+    }
 }
 
 Type* VarDec_Func(Node* node, Type* ty) {bug; // ty might be NULL
@@ -309,7 +351,7 @@ Type* VarDec_Func(Node* node, Type* ty) {bug; // ty might be NULL
     if(node_VarDec != NULL) {
         // VarDec - VarDec LB INT RB
         Node* node_INT = getSon(node, "INT");
-        return VarDec_Func(node_VarDec, getTypeArray(ty, node_INT->int_value));
+        return VarDec_Func(node_VarDec, getTypeArray(ty, node_INT->int_value, getTypeSize(ty)));
     }
     // VarDec - ID
     assert(node_ID != NULL);
@@ -318,6 +360,7 @@ Type* VarDec_Func(Node* node, Type* ty) {bug; // ty might be NULL
     Type* symb_test = querySymbol(name);
     if(stru_test != NULL || symb_test != NULL) {
         printf("Error type 3 at line %d: Redefined variable name \'%s\'.\n", node->line, name);
+        semantic_error = 1;
     } else {
         insertSymbol(name, ty);
     }
@@ -398,6 +441,7 @@ void Dec(Node* node, Type* ty) {bug;
         Node* node_Exp = getSon(node, "Exp");
         if(!isSameType(ty, Exp(node_Exp))) {
             printf("Error type 5 at line %d: Unmatching assignment.\n", node->line);
+            semantic_error = 1;
         }
     }
 }
@@ -434,6 +478,7 @@ void Stmt(Node* node, Function* func) {bug;
         Type* returnType = Exp(getSon(node, "Exp"));
         if(!isSameType(returnType, func->returnType)) {
             printf("Error type 8 at line %d: Unmatching return type.\n", node->line);
+            semantic_error = 1;
         }
         return ;
     }
@@ -464,19 +509,29 @@ Type* Exp(Node* node) {bug;
         Type* ty_exp2 = Exp(node->son->next->next);
         if(!isSameType(ty_exp1, ty_exp2)) {
             printf("Error type 5 at line %d: Unmaching assignment.\n", node->line);
+            semantic_error = 1;
         }
         if(!checkLeftValue(node->son)) {
             printf("Error type 6 at line %d: Assigning to a right value.\n", node->line);
+            semantic_error = 1;
         }
         return ty_exp1;
     }
     if (getSon(node, "AND") != NULL ||
-        getSon(node, "OR") != NULL ||
-        getSon(node, "NOT") != NULL) {
+        getSon(node, "OR") != NULL) {
         Type* ty_exp1 = Exp(node->son);
         Type* ty_exp2 = Exp(node->son->next->next);
         if(!isSameType(ty_exp1, ty_int) || !isSameType(ty_exp2, ty_int)) {
             printf("Error type 7 at line %d: Logic operands only accept int values.\n", node->line);
+            semantic_error = 1;
+        }
+        return ty_int;
+    }
+    if(getSon(node, "NOT") != NULL) {
+        Type* ty_exp1 = Exp(node->son->next);
+        if(!isSameType(ty_exp1, ty_int)) {
+            printf("Error type 7 at line %d: Logic operands only accept int values.\n", node->line);
+            semantic_error = 1;
         }
         return ty_int;
     }
@@ -493,6 +548,7 @@ Type* Exp(Node* node) {bug;
         if((!isSameType(ty_exp1, ty_int) || !isSameType(ty_exp2, ty_int)) && 
            (!isSameType(ty_exp1, ty_float) || !isSameType(ty_exp2, ty_float))) {
             printf("Error type 7 at line %d: Unaccepted operand type.\n", node->line);
+            semantic_error = 1;
         }
         if(!strcmp(node->son->next->lex_name, "RELOP")) {
             return ty_int;
@@ -505,6 +561,7 @@ Type* Exp(Node* node) {bug;
             Type* ty_exp = Exp(node->son->next);
             if(!isSameType(ty_exp, ty_int) && !isSameType(ty_exp, ty_float)) {
                 printf("Error type 7 at line %d: Unaccepted operand type.\n", node->line);
+                semantic_error = 1;
             }
             return ty_exp;
         }
@@ -514,6 +571,7 @@ Type* Exp(Node* node) {bug;
         if((!isSameType(ty_exp1, ty_int) || !isSameType(ty_exp2, ty_int)) && 
            (!isSameType(ty_exp1, ty_float) || !isSameType(ty_exp2, ty_float))) {
             printf("Error type 7 at line %d: Unaccepted operand type.\n", node->line);
+            semantic_error = 1;
         }
         return ty_exp1;
     }
@@ -528,9 +586,11 @@ Type* Exp(Node* node) {bug;
         Type* ty_exp2 = Exp(node->son->next->next);
         if(!isSameType(ty_exp2, ty_int)) {
             printf("Error type 12 at line %d: Cannot use non-int as array index.\n", node->line);
+            semantic_error = 1;
         }
         if(ty_exp1->kind != ARRAY) {
             printf("Error type 10 at line %d: Cannot index a non-array.\n", node->line);
+            semantic_error = 1;
             return ty_exp1;
         }
         return ty_exp1->elem;
@@ -539,6 +599,7 @@ Type* Exp(Node* node) {bug;
         Type* ty_exp = Exp(node->son);
         if(ty_exp->kind != STRUCTURE) {
             printf("Error type 13 at line %d: Cannot field a non-struct.\n", node->line);
+            semantic_error = 1;
             return ty_exp;
         }
         char* field_name = node->son->next->next->content;
@@ -551,6 +612,7 @@ Type* Exp(Node* node) {bug;
             return cur->type;
         }
         printf("Error type 14 at line %d: Undefined field \'%s\'.\n", node->line, field_name);
+        semantic_error = 1;
         return ty_exp;
     }
     assert(!strcmp(node->son->lex_name, "ID"));
@@ -558,6 +620,7 @@ Type* Exp(Node* node) {bug;
         Type* ty = querySymbol(node->son->content);
         if(ty == NULL) {
             printf("Error type 1 at line %d: Undefined variable \'%s\'.\n", node->line, node->son->content);
+            semantic_error = 1;
             return NULL;
         }
         return ty;
@@ -570,14 +633,17 @@ Type* Exp(Node* node) {bug;
     Function* func = queryFunc(func_name);
     if(querySymbol(func_name) != NULL) {
         printf("Error type 11 at line %d: Cannot call a variable \'%s\'.\n", node->line, func_name);
+        semantic_error = 1;
         return NULL;
     }
     if(func == NULL) {
         printf("Error type 2 at line %d: Undefined function \'%s\'.\n", node->line, func_name);
+        semantic_error = 1;
         return NULL;
     }
     if(!isMatchFuncArg(func, fake_func)) {
         printf("Error type 9 at line %d: Unmaching args for function \'%s\'.\n", node->line, func_name);
+        semantic_error = 1;
         return NULL;
     }
     return func->returnType;

@@ -98,7 +98,7 @@ OCOM "//"
           return ASSIGNOP; }
 
 {RELOP} { /*printf("RELOP %s\n", yytext);*/
-          yylval.type_node = Constructor("RELOP", "\0", TYPE_TERMINAL, yylineno); 
+          yylval.type_node = Constructor("RELOP", yytext, TYPE_TERMINAL, yylineno); 
           return RELOP; }
 
 {PLUS}  { /*printf("PLUS %s\n", yytext);*/

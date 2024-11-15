@@ -1,0 +1,29 @@
+struct S {
+    int sa;
+    struct {
+        int sb;
+        float sc[2];
+    } ss[10];
+    struct T {
+        int sbe[10];
+        int se;
+    } sss;
+    float sd[5];
+};
+
+int func1(struct T argt) {
+    return argt.se;
+}
+float func2(float arga[5]) {
+    return arga[0];
+}
+
+int main() {
+    // struct S j[20];
+    struct S d;
+
+    // j[10].ss[5].sb = 114514;
+    // d.sss.se = 1919810;
+    func1(d.sss);
+    func2(d.sd);
+}

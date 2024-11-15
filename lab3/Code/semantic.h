@@ -7,6 +7,11 @@
 #include <string.h>
 #include <assert.h>
 
+// utils
+void define_Lib_Func();
+Node* getSon(Node* node, char* name);
+int getTypeSize(Type* ty);
+
 // Function declarations
 void ExtDefList(Node* node);
 void ExtDef(Node* node);
