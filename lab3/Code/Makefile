@@ -36,3 +36,4 @@ clean:
 	rm -f $(LFC) $(YFC) $(YFC:.c=.h)
 	rm -f *~
 	rm -f *.ir
+	rm -f .gdb_history peda-session-parser.txt

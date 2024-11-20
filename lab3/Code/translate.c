@@ -2,7 +2,8 @@
 
 // #define bug printf("> %s (%d) <%s, %d>\n", node->lex_name, node->line, __FUNCTION__, __LINE__)
 #define bug true
-#define bug2 printf("> %s (%d) <%s, %d>\n", node->lex_name, node->line, __FUNCTION__, __LINE__)
+// #define bug2 printf("> %s (%d) <%s, %d>\n", node->lex_name, node->line, __FUNCTION__, __LINE__)
+#define bug2 true
 
 extern Type* structTable[16384];
 extern Type* symbolTable[16384];
@@ -16,6 +17,7 @@ InterCodes* translate_ExtDefList(Node* node) {
     InterCodes* ExtDefList_codes = translate_ExtDefList(getSon(node, "ExtDefList"));
 
     append_InterCodes(ExtDef_codes, ExtDefList_codes);
+    bug;
     return ExtDef_codes;
 }
 
@@ -150,7 +152,7 @@ InterCodes* translate_Stmt(Node* node) {
     
     // Exp SEMI
     if(!strcmp(node->son->lex_name, "Exp")) {
-        return translate_Exp(getSon(node, "Exp"), "NULL");
+        return translate_Exp(getSon(node, "Exp"), "tNULL");
     }
     // CompSt
     if(getSon(node, "CompSt")) {
@@ -245,29 +247,84 @@ InterCodes* translate_Exp(Node* node, char* place) {
         char* tval = new_temp();
         InterCodes* RExp_codes = translate_Exp(node->son->next->next, tval);
         if(!strcmp(node->son->son->lex_name, "ID")) {
-            append_InterCode(RExp_codes, new_InterCode(IC_ASSIGN, node->son->son->content, tval));
-            return RExp_codes;
+            char* id = node->son->son->content;
+            Type* ty = querySymbol(id);
+            if(ty->kind == BASIC) {
+                append_InterCode(RExp_codes, new_InterCode(IC_ASSIGN, node->son->son->content, tval));
+                return RExp_codes;
+            } else {
+                char* laddr = new_temp();
+                append_InterCode(RExp_codes, new_InterCode(IC_ADDROF, laddr, id));
+
+                char* raddr = tval;
+
+                int tysize = getTypeSize(ty) >> 2; // bytes -> #int
+
+                append_InterCode(RExp_codes, new_InterCode(IC_ASSIGN, place, tval));
+
+                char* ttmp = new_temp();
+                for(int i = 1; i <= tysize; i++) {
+                    append_InterCode(RExp_codes, new_InterCode(IC_ASSIGNFROMADDR, ttmp, raddr));
+                    append_InterCode(RExp_codes, new_InterCode(IC_ASSIGNTOADDR, laddr, ttmp));
+                    if(i != tysize) {
+                        append_InterCode(RExp_codes, new_InterCode(IC_PLUS, laddr, laddr, "#4"));
+                        append_InterCode(RExp_codes, new_InterCode(IC_PLUS, raddr, raddr, "#4"));
+                    }
+                }
+                
+                return RExp_codes;
+            }
         }
         char* toffset = new_temp();
-        InterCodes* LExp_codes = translate_Exp_Offset(node->son, toffset).ic;
+        Offset_Query info = translate_Exp_Offset(node->son, toffset);
+        // OutputType(info.ty, 0);
+        InterCodes* LExp_codes = info.ic;
         
         char* id;
         Node* cur = node;
         while(strcmp(cur->lex_name, "ID")) cur = cur->son;
         id = cur->content;
 
-        char* taddr = new_temp();
-        if(isregisteredParam(id)) {
-            append_InterCode(LExp_codes, new_InterCode(IC_ASSIGN, taddr, id));
+        if(info.ty->kind == BASIC) {
+            char* taddr = new_temp();
+            if(isregisteredParam(id)) {
+                append_InterCode(LExp_codes, new_InterCode(IC_ASSIGN, taddr, id));
+            } else {
+                append_InterCode(LExp_codes, new_InterCode(IC_ADDROF, taddr, id));
+            }
+            append_InterCode(LExp_codes, new_InterCode(IC_PLUS, taddr, taddr, toffset));
+            append_InterCode(LExp_codes, new_InterCode(IC_ASSIGNTOADDR, taddr, tval));
+            append_InterCodes(RExp_codes, LExp_codes);
+            append_InterCode(RExp_codes, new_InterCode(IC_ASSIGN, place, tval));
+            return RExp_codes;
         } else {
-            append_InterCode(LExp_codes, new_InterCode(IC_ADDROF, taddr, id));
+            char* laddr = new_temp();
+            if(isregisteredParam(id)) {
+                append_InterCode(LExp_codes, new_InterCode(IC_ASSIGN, laddr, id));
+            } else {
+                append_InterCode(LExp_codes, new_InterCode(IC_ADDROF, laddr, id));
+            }
+            append_InterCode(LExp_codes, new_InterCode(IC_PLUS, laddr, laddr, toffset));
+            append_InterCodes(RExp_codes, LExp_codes);
+
+            char* raddr = tval;
+
+            int tysize = getTypeSize(info.ty) >> 2;
+
+            append_InterCode(RExp_codes, new_InterCode(IC_ASSIGN, place, tval));
+
+            char* ttmp = new_temp();
+            for(int i = 1; i <= tysize; i++) {
+                append_InterCode(RExp_codes, new_InterCode(IC_ASSIGNFROMADDR, ttmp, raddr));
+                append_InterCode(RExp_codes, new_InterCode(IC_ASSIGNTOADDR, laddr, ttmp));
+                if(i != tysize) {
+                    append_InterCode(RExp_codes, new_InterCode(IC_PLUS, laddr, laddr, "#4"));
+                    append_InterCode(RExp_codes, new_InterCode(IC_PLUS, raddr, raddr, "#4"));
+                }
+            }
+            
+            return RExp_codes;
         }
-        // append_InterCode(LExp_codes, new_InterCode(IC_ADDROF, taddr, id));
-        append_InterCode(LExp_codes, new_InterCode(IC_PLUS, taddr, taddr, toffset));
-        append_InterCode(LExp_codes, new_InterCode(IC_ASSIGNTOADDR, taddr, tval));
-        append_InterCodes(RExp_codes, LExp_codes);
-        append_InterCode(RExp_codes, new_InterCode(IC_ASSIGN, place, tval));
-        return RExp_codes;
     }
     // PLUS
     if(getSon(node, "PLUS") != NULL) {
@@ -456,6 +513,8 @@ Offset_Query translate_Exp_Offset(Node* node, char* place) {
         Offset_Query ans;
         ans.ic = get_InterCode_wrapped(new_InterCode(IC_ASSIGN, place, "#0"));
         ans.ty = ty;
+        // printf("ans.ty:\n");
+        // OutputType(ans.ty, 0);
         return ans;
     }
 }

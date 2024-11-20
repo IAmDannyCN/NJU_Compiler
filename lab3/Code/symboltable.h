@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 typedef struct Type Type;
 typedef struct FieldList FieldList;

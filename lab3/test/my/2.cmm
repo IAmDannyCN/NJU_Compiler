@@ -1,0 +1,40 @@
+struct BigN {
+    int length;
+    int num[10];
+};
+
+int Input(struct BigN toRead) {
+    int read_int = read();
+
+    toRead.length = 0;
+    while(read_int) {
+        toRead.length = toRead.length + 1;
+        toRead.num[toRead.length] = read_int - read_int / 10 * 10;
+        read_int = read_int / 10;
+    }
+
+    return 1;
+}
+
+int Output(struct BigN toPrint) {
+    int output_i = toPrint.length;
+    int out_ans = 0;
+
+    while(output_i >= 1) {
+        out_ans = out_ans * 10 + toPrint.num[output_i];
+        output_i = output_i - 1;
+    }
+
+    write(out_ans);
+
+    return 1;
+}
+
+int main() {
+    struct BigN x;
+
+    Input(x);
+    Output(x);
+
+    return 0;
+}

@@ -11,3 +11,9 @@ Use `parser xxx.cmm yyy.ir` to run lex/syntax/semantic check for `xxx.cmm`, then
 Lab 3: Code Completed. Unknown bugs remain to fix.
 
 Score: 94/100
+
+**2024.11.20**
+
+Lab 3: Code Completed. Previous bugs are caused by not handling the direct assignment between arrays.
+
+Score: 100/100
