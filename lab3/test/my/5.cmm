@@ -1,0 +1,15 @@
+struct ARRAY {
+    int a[3];
+};
+
+int Out(struct ARRAY y) {
+    write(y.a[0]);
+    return 0;
+}
+
+int main() {
+    struct ARRAY x;
+    x.a[0] = 114514;
+    Out(x);
+    return 0;
+}

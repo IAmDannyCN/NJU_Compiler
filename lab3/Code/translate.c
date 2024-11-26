@@ -122,18 +122,48 @@ InterCodes* translate_Dec(Node* node) {
     id = cur->content;
 
     Type* ty = querySymbol(id);
+    InterCodes* res = get_empty_InterCodes();
     if(ty->kind == STRUCTURE) {
-        return get_InterCode_wrapped(new_InterCode(IC_DEC, id, ty->stru_size));
+        append_InterCode(res, new_InterCode(IC_DEC, id, ty->stru_size));
     } else if (ty->kind == ARRAY) {
-        return get_InterCode_wrapped(new_InterCode(IC_DEC, id, ty->size * ty->elem_size));
-    } else if (getSon(node, "Exp") != NULL){
-        bug;
-        char* t1 = new_temp();
-        InterCodes* Exp_codes = translate_Exp(getSon(node, "Exp"), t1);
-        append_InterCode(Exp_codes, new_InterCode(IC_ASSIGN, id, t1));
-        return Exp_codes;
+        append_InterCode(res, new_InterCode(IC_DEC, id, ty->size * ty->elem_size));
     }
-    return get_empty_InterCodes();
+
+    
+    if (getSon(node, "ASSIGNOP") != NULL){
+        if(ty->kind == BASIC) {
+            char* t1 = new_temp();
+            InterCodes* Exp_codes = translate_Exp(getSon(node, "Exp"), t1);
+            append_InterCode(Exp_codes, new_InterCode(IC_ASSIGN, id, t1));
+            return Exp_codes;
+        } else {
+            char* t1 = new_temp();
+            InterCodes* Exp_codes = translate_Exp(getSon(node, "Exp"), t1);
+            append_InterCodes(res, Exp_codes);
+            // fprint_InterCodes(stdout, res);
+            // printf("-----------------------\n");
+            char* laddr = new_temp();
+            // char* raddr = malloc(strlen(t1) + 1);
+            // strcpy(raddr, t1);
+            char* raddr = t1;
+            append_InterCode(res, new_InterCode(IC_ADDROF, laddr, id));
+
+            int tysize = getTypeSize(ty) >> 2;
+            char* t_temp = new_temp();
+            
+            for(int i = 1; i <= tysize; i++) {
+                append_InterCode(res, new_InterCode(IC_ASSIGNFROMADDR, t_temp, raddr));
+                append_InterCode(res, new_InterCode(IC_ASSIGNTOADDR, laddr, t_temp));
+                if(i != tysize) {
+                    append_InterCode(res, new_InterCode(IC_PLUS, laddr, laddr, "#4"));
+                    append_InterCode(res, new_InterCode(IC_PLUS, raddr, raddr, "#4"));
+                }
+            }
+            
+            return res;
+        }
+    }
+    return res;
 }
 
 InterCodes* translate_StmtList(Node* node) {

@@ -6,7 +6,8 @@ struct STRUCT_T {
 };
 
 int cross(struct STRUCT_T A, struct STRUCT_T B) {
-    B.sa[9].ssa = A.sa[3].ssb;
+    int temp[5] = A.sa[3].ssb;
+    B.sa[9].ssa = temp;
     return 0;
 }
 
@@ -18,30 +19,3 @@ int main() {
     write(t.sa[9].ssa[2]);
     return 0;
 }
-
-
-
-/*
-int main() {
-    struct S {
-        int a[1];
-        int b[1];
-    } s;
-    s.a[0] = 15;
-    s.b = s.a;
-    write(s.b[0]);
-    return 0;
-}
-*/
-
-/*
-int main() {
-    int a[10];
-    int b[10];
-    int c[10];
-    a[1] = 114514;
-    c = b = a;
-    write(c[1]);
-    return 0;
-}
-*/

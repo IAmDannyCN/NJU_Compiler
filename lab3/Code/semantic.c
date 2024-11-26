@@ -438,8 +438,13 @@ void Dec(Node* node, Type* ty) {bug;
     VarDec(node_VarDec, ty);
     if(node_ASSIGNOP != NULL) {
         // Dec - VarDec ASSIGNOP Exp
+        Node* cur = node;
+        while(strcmp(cur->lex_name, "ID")) cur = cur->son;
+        Type* ty_dec = querySymbol(cur->content);
+
         Node* node_Exp = getSon(node, "Exp");
-        if(!isSameType(ty, Exp(node_Exp))) {
+        Type* ty_exp = Exp(node_Exp);
+        if(!isSameType(ty_dec, ty_exp)) {
             printf("Error type 5 at line %d: Unmatching assignment.\n", node->line);
             semantic_error = 1;
         }
