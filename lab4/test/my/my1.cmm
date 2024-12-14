@@ -1,0 +1,8 @@
+int fun(int a, int b) {
+    int arr[10];
+    return 1;
+}
+int main() {
+    fun(4, 5);
+    return 0;
+}

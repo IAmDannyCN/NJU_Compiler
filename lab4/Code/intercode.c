@@ -61,18 +61,20 @@ void delete_NULL_IC(InterCodes* codes) {
 // new
 char* new_temp() {
     temp_cnt ++;
-    char* ans = malloc(2 + (int)my_log10(temp_cnt) + 1);
+    char* ans = malloc(3 + (int)my_log10(temp_cnt) + 1);
     memset(ans, 0, sizeof(ans));
-    ans[0] = 't';
-    sprintf(ans + 1, "%d", temp_cnt);
+    ans[0] = '_';
+    ans[1] = 't';
+    sprintf(ans + 2, "%d", temp_cnt);
     return ans;
 }
 char* new_label() {
     temp_label ++;
-    char* ans = malloc(2 + (int)my_log10(temp_label) + 1);
+    char* ans = malloc(3 + (int)my_log10(temp_label) + 1);
     memset(ans, 0, sizeof(ans));
-    ans[0] = 'L';
-    sprintf(ans + 1, "%d", temp_label);
+    ans[0] = '_';
+    ans[1] = 'L';
+    sprintf(ans + 2, "%d", temp_label);
     return ans;
 }
 
@@ -283,6 +285,87 @@ void fprint_InterCodes(FILE* f, InterCodes* codes) {
     while(cur != NULL) {
         fprint_InterCode(f, cur);
         fprintf(f, "\n");
+        cur = cur->next;
+    }
+}
+void sprint_InterRelop(char* f, InterRelop* relop) {
+    char* rel_str[6] = {"<", ">", "<=", ">=", "==", "!="};
+    sprintf(f, "%s", rel_str[relop->kind]);
+}
+void sprint_InterCode(char* f, InterCode* code) {
+    switch(code->kind) {
+        case IC_DEC:
+            sprintf(f, "DEC %s %d", code->dest, code->size);
+            break;
+        case IC_IFGOTO:
+            sprintf(f, "IF %s ", code->arg1);
+            sprint_InterRelop(f, code->relop);
+            sprintf(f, " %s GOTO %s", code->arg2, code->dest);
+            break;
+        case IC_LABEL:
+            sprintf(f, "LABEL %s :", code->dest);
+            break;
+        case IC_FUNCTION:
+            sprintf(f, "FUNCTION %s :", code->dest);
+            break;
+        case IC_GOTO:
+            sprintf(f, "GOTO %s", code->dest);
+            break;
+        case IC_RETURN:
+            sprintf(f, "RETURN %s", code->dest);
+            break;
+        case IC_ARG:
+            sprintf(f, "ARG %s", code->dest);
+            break;
+        case IC_PARAM:
+            sprintf(f, "PARAM %s", code->dest);
+            break;
+        case IC_READ:
+            sprintf(f, "READ %s", code->dest);
+            break;
+        case IC_WRITE:
+            sprintf(f, "WRITE %s", code->dest);            
+            break;
+        case IC_ASSIGN:
+            sprintf(f, "%s := %s", code->dest, code->arg1);
+            break;
+        case IC_ADDROF:
+            sprintf(f, "%s := &%s", code->dest, code->arg1);
+            break;
+        case IC_ASSIGNFROMADDR:
+            sprintf(f, "%s := *%s", code->dest, code->arg1);
+            break;
+        case IC_ASSIGNTOADDR:
+            sprintf(f, "*%s := %s", code->dest, code->arg1);
+            break;
+        case IC_ASSIGNCALL:
+            sprintf(f, "%s := CALL %s", code->dest, code->arg1);
+            break;
+        case IC_PLUS:
+            sprintf(f, "%s := %s + %s", code->dest, code->arg1, code->arg2);
+            break;
+        case IC_MINUS:
+            sprintf(f, "%s := %s - %s", code->dest, code->arg1, code->arg2);
+            break;
+        case IC_PROD:
+            sprintf(f, "%s := %s * %s", code->dest, code->arg1, code->arg2);
+            break;
+        case IC_DIV:
+            sprintf(f, "%s := %s / %s", code->dest, code->arg1, code->arg2);
+            break;
+        default:
+            fprintf(stderr, "Invalid kind for new_InterCode: %d\n", code->kind);
+            exit(0);
+    }
+}
+void sprint_InterCodes(char* f, InterCodes* codes) {
+    if(codes == NULL) {
+        return ;
+    }
+    InterCode* cur = codes->head;
+    while(cur != NULL) {
+        sprint_InterCode(f, cur);
+        sprintf(f, "\n");
         cur = cur->next;
     }
 }

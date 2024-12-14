@@ -1,16 +1,25 @@
 #include "symboltable.h"
 
-Type* structTable[16384];
-Type* symbolTable[16384];
-Function* funcTable[16384];
+Type* structTable[262144];
+Type* symbolTable[262144];
+Function* funcTable[262144];
 
 unsigned int hash(char* name) {
-    unsigned int val = 0, i;
-    for(; *name; ++name) {
-        val = (val << 2) + *name;
-        if(i = val & ~0x3fff) val = (val ^ (i >> 12)) & 0x3fff;
+    // unsigned int val = 0, i;
+    // for(; *name; ++name) {
+    //     val = (val << 2) + *name;
+    //     if(i = val & ~0x3ffff) val = (val ^ (i >> 12)) & 0x3ffff;
+    // }
+    // return val;
+    unsigned int h = 0;
+    const unsigned int M = 262144;
+    
+    while (*name) {
+        h = (h * 137 + (unsigned char)*name) % M;
+        name++;
     }
-    return val;
+    
+    return h;
 }
 
 // CONSTRUCT

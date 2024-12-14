@@ -75,6 +75,11 @@ MipsCodes* translate_ic(InterCodes* ics) {
     InterCode* ic = ics->head;
     while(ic != NULL) {
         AM("");
+        char* ir = malloc(128);
+        memset(ir, 0, 128);
+        sprint_InterCode(ir, ic);
+        AM("                   # %s", ir);
+
         switch(ic->kind) {
         case IC_LABEL: {
             AM("%s:", ic->dest);
@@ -83,6 +88,7 @@ MipsCodes* translate_ic(InterCodes* ics) {
             AM("%s:", ic->dest);
             clear_Stack_Records();
             prepare_Sp(mc, ic);
+            Output_Sp_Table(mc, ic);
             param_cnt = 0;
             arg_cnt = 0;
         } break;
@@ -234,7 +240,7 @@ MipsCodes* translate_ic(InterCodes* ics) {
             AM("  jr $ra");
         } break;
         case IC_DEC: {
-            dec_Stack_Offset(mc, ic->dest, ic->size);
+            ;
         } break;
         case IC_ARG: {
             if(arg_cnt == 0) {
@@ -249,8 +255,7 @@ MipsCodes* translate_ic(InterCodes* ics) {
             AM("  lw $t0, %d($sp)", x_offset);
             if(arg_cnt >= 5) {
                 arg_stack_cnt += 1;
-                AM("  addi $sp, $sp, -4");
-                AM("  sw $t0, 0($sp)");
+                AM("  sw $t0, -%d($sp)", arg_stack_cnt << 2);
             } else {
                 AM("  move $a%d, $t0", arg_cnt - 1);
             }
@@ -259,6 +264,9 @@ MipsCodes* translate_ic(InterCodes* ics) {
         case IC_ASSIGNCALL: {
             assert(arg_cnt == 0);
             int x_offset = get_Stack_Offset(mc, ic->dest);
+            if(arg_stack_cnt > 0) {
+                AM("  addi $sp, $sp, -%d", arg_stack_cnt << 2);
+            }
             AM("  addi $sp, $sp, -4");
             AM("  sw $ra, 0($sp)");
             AM("  jal %s", ic->arg1);
@@ -320,54 +328,148 @@ void fprint_MipsCodes(FILE* f, MipsCodes* mcs) {
 }
 
 // stack
-static int offsetTable[262144];
 int sp_move_cnt; // How many TIMES $sp has moved down in the current function
-static unsigned int ext_hash(char* name) {
-    unsigned int val = 0, i;
-    for(; *name; ++name) {
-        val = (val << 2) + *name;
-        if(i = val & ~0x3ffff) val = (val ^ (i >> 12)) & 0x3ffff;
-    }
-    return val;
-}
+// static int offsetTable[262144];
+// static int offsetTable_v2[262144];
+// unsigned int ext_hash(char* name) {
+//     // unsigned int val = 0, i;
+//     // for(; *name; ++name) {
+//     //     val = (val << 2) + *name;
+//     //     if(i = val & ~0x3ffff) val = (val ^ (i >> 12)) & 0x3ffff;
+//     // }
+//     // return val;
+//     unsigned int h = 0;
+//     const unsigned int M = 262144;
+    
+//     while (*name) {
+//         h = (h * 131 + (unsigned char)*name) % M;
+//         name++;
+//     }
+    
+//     return h;
+// }
 
+static Stack_Offset_Record* sprec_head;
+static Stack_Offset_Record* sprec_tail;
+
+static Stack_Offset_Record* Find_rec(char* name) {
+    Stack_Offset_Record* cur = sprec_head;
+    // printf("Find: %s\n", name);
+    while(cur != NULL) {
+        if(!strcmp(cur->name, name)) {
+            return cur;
+        }
+        cur = cur->next;
+    }
+    return NULL;
+}
+static void Append_rec(Stack_Offset_Record* cur) {
+    // printf("Add: %s\n", cur->name);
+    if(sprec_head == NULL) {
+        sprec_head = sprec_tail = cur;
+    } else {
+        sprec_tail->next = cur;
+        sprec_tail = cur;
+    }
+}
 int get_Stack_Offset(MipsCodes* mc, char* name) {
-    unsigned int hashid = ext_hash(name);
-    assert(offsetTable[hashid] != 0);
-    return ((sp_move_cnt - offsetTable[hashid]) << 2);
+    // unsigned int hashid = ext_hash(name);
+    // assert(offsetTable[hashid] != 0);
+    // return ((sp_move_cnt - offsetTable[hashid]) << 2);
+    Stack_Offset_Record* rec = Find_rec(name);
+    assert(rec != NULL);
+    return ((sp_move_cnt - rec->cnt) << 2);
 }
 void add_Stack_Offset(char* name) {
-    unsigned int hashid = ext_hash(name);
-    if(!offsetTable[hashid]) {
-        offsetTable[hashid] = ++sp_move_cnt;
+    // unsigned int hashid = ext_hash(name);
+    // if(!offsetTable[hashid] && !(name[0] == '_' && name[1] == 'L')) {
+    //     sp_move_cnt ++;
+    //     offsetTable[hashid] = sp_move_cnt;
+    // }
+    Stack_Offset_Record* rec = Find_rec(name);
+    if(rec == NULL && !(name[0] == '_' && name[1] == 'L')) {
+        sp_move_cnt ++;
+        Stack_Offset_Record* cur = malloc(sizeof(Stack_Offset_Record));
+        cur->name = malloc(strlen(name) + 1);
+        strcpy(cur->name, name);
+        cur->cnt = sp_move_cnt;
+        cur->next = NULL;
+        Append_rec(cur);
     }
 }
+// void output_Stack_Offset(MipsCodes* mc, char* name) {
+//     unsigned int hashid = ext_hash(name);
+//     if(!offsetTable_v2[hashid] && offsetTable[hashid]) {
+//         offsetTable_v2[hashid] = 1;
+//         AM("# %s -> %d($sp)", name, ((sp_move_cnt - offsetTable[hashid]) << 2));
+//     }
+// }
 void prepare_Sp(MipsCodes* mc, InterCode* ic) {
     ic = ic->next;
     while(ic && ic->kind != IC_FUNCTION) {
-        if(ic->dest != NULL && ic->dest[0] != '#') {
-            add_Stack_Offset(ic->dest);
-        }
-        if(ic->arg1 != NULL && ic->arg1[0] != '#') {
-            add_Stack_Offset(ic->arg1);
-        }
-        if(ic->arg2 != NULL && ic->arg2[0] != '#') {
-            add_Stack_Offset(ic->arg2);
+        if(ic->kind == IC_DEC) {
+            dec_Stack_Offset(mc, ic->dest, ic->size);
+        } else {
+            if(ic->dest != NULL && ic->dest[0] != '#') {
+                add_Stack_Offset(ic->dest);
+            }
+            if(ic->arg1 != NULL && ic->arg1[0] != '#') {
+                add_Stack_Offset(ic->arg1);
+            }
+            if(ic->arg2 != NULL && ic->arg2[0] != '#') {
+                add_Stack_Offset(ic->arg2);
+            }
         }
         ic = ic->next;
     }
     AM("  addi $sp, $sp, -4");
-    AM("  sw $s8 0($sp)");
+    AM("  sw $s8, 0($sp)");
     AM("  la $s8, 4($sp)");
     AM("  addi $sp, $sp, -%d", (sp_move_cnt << 2));
 }
+void Output_Sp_Table(MipsCodes* mc, InterCode* ic) {
+    // ic = ic->next;
+    // AM("");
+    // while(ic && ic->kind != IC_FUNCTION) {
+    //     if(ic->dest != NULL && ic->dest[0] != '#') {
+    //         output_Stack_Offset(mc, ic->dest);
+    //     }
+    //     if(ic->arg1 != NULL && ic->arg1[0] != '#') {
+    //         output_Stack_Offset(mc, ic->arg1);
+    //     }
+    //     if(ic->arg2 != NULL && ic->arg2[0] != '#') {
+    //         output_Stack_Offset(mc, ic->arg2);
+    //     }
+    //     ic = ic->next;
+    // }
+    Stack_Offset_Record* cur = sprec_head;
+    while(cur != NULL) {
+        AM("# %s -> %d($sp)", cur->name, ((sp_move_cnt - cur->cnt) << 2));
+        cur = cur->next;
+    }
+}
 void dec_Stack_Offset(MipsCodes* mc, char* name, int size) {
-    unsigned int hashid = ext_hash(name);
+    // unsigned int hashid = ext_hash(name);
+    // sp_move_cnt += (size >> 2);
+    // offsetTable[hashid] = sp_move_cnt;
     sp_move_cnt += (size >> 2);
-    offsetTable[hashid] = sp_move_cnt;
-    AM("  addi $sp, $sp, -%d", size);
+    Stack_Offset_Record* cur = malloc(sizeof(Stack_Offset_Record));
+    cur->name = malloc(strlen(name) + 1);
+    strcpy(cur->name, name);
+    cur->cnt = sp_move_cnt;
+    cur->next = NULL;
+    Append_rec(cur);
+    // AM("  addi $sp, $sp, -%d", size);
 }
 void clear_Stack_Records(){
     sp_move_cnt = 0;
-    memset(offsetTable, 0, sizeof(offsetTable));
+    // memset(offsetTable, 0, sizeof(offsetTable));
+    // memset(offsetTable_v2, 0, sizeof(offsetTable_v2));
+    Stack_Offset_Record* cur = sprec_head;
+    while(cur != NULL) {
+        Stack_Offset_Record* next = cur->next;
+        free(cur);
+        cur = next;
+    }
+    sprec_head = sprec_tail = NULL;
 }

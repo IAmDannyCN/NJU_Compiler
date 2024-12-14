@@ -35,9 +35,18 @@ MipsCodes* translate_ic(InterCodes* ic);
 void fprint_MipsCodes(FILE* f, MipsCodes* mc);
 
 // stack
+typedef struct Stack_Offset_Record Stack_Offset_Record;
+struct Stack_Offset_Record {
+    char* name;
+    int cnt;
+    Stack_Offset_Record* next;
+};
+unsigned int ext_hash(char* name);
 int get_Stack_Offset(MipsCodes* mc, char* name);
 void add_Stack_Offset(char* name);
+void output_Stack_Offset(MipsCodes* mc, char* name);
 void prepare_Sp(MipsCodes* mc, InterCode* ic);
+void Output_Sp_Table(MipsCodes* mc, InterCode* ic);
 void dec_Stack_Offset(MipsCodes* mc, char* name, int size);
 void clear_Stack_Records();
 

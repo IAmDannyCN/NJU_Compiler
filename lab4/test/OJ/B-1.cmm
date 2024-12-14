@@ -1,13 +1,13 @@
-// int binaryToDecimal(int binary) {
-//   int decimal = 0;
-//   int multiplier = 1;
-//   while (binary != 0) {
-//     decimal = decimal + (binary - (binary / 10) * 10) * multiplier;
-//     binary = binary / 10;
-//     multiplier = multiplier * 2;
-//   }
-//   return decimal;
-// }
+int binaryToDecimal(int binary) {
+  int decimal = 0;
+  int multiplier = 1;
+  while (binary != 0) {
+    decimal = decimal + (binary - (binary / 10) * 10) * multiplier;
+    binary = binary / 10;
+    multiplier = multiplier * 2;
+  }
+  return decimal;
+}
 
 int calculate_power(int base, int power) {
   int i = 0, result = 1;
@@ -38,12 +38,12 @@ int decimal_to_binary(int d) {
 }
 
 int main() {
-  // int bin;
+  int bin;
   int dec;
 
-  // bin = read();
-  // dec = binaryToDecimal(bin);
-  // write(dec);
+  bin = read();
+  dec = binaryToDecimal(bin);
+  write(dec);
 
   dec = read();
   decimal_to_binary(dec);

@@ -65,6 +65,9 @@ void append_InterCodes(InterCodes* target, InterCodes* cur);
 void fprint_InterRelop(FILE* f, InterRelop* relop);
 void fprint_InterCode(FILE* f, InterCode* code);
 void fprint_InterCodes(FILE* f, InterCodes* codes);
+void sprint_InterRelop(char* f, InterRelop* relop);
+void sprint_InterCode(char* f, InterCode* code);
+void sprint_InterCodes(char* f, InterCodes* codes);
 
 // ParamPass
 void registerParam(char* name);

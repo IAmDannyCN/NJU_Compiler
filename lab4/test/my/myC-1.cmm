@@ -1,0 +1,57 @@
+int min(int a, int b) {
+  if (a <= b)
+    return a;
+  else
+    return b;
+}
+
+int jumpSearch() {
+  int arr[16];
+  int x;
+  int n = 16;
+  int step = 4;
+  int i = 0;
+  int prev = 0;
+
+  arr[0] = 0;
+  arr[1] = 1;
+  arr[2] = 1;
+  arr[3] = 2;
+  arr[4] = 3;
+  arr[5] = 5;
+  arr[6] = 8;
+  arr[7] = 13;
+  arr[8] = 21;
+  arr[9] = 34;
+  arr[10] = 55;
+  arr[11] = 89;
+  arr[12] = 144;
+  arr[13] = 233;
+  arr[14] = 377;
+  arr[15] = 610;
+  x = 55;
+  
+  while (arr[min(step, n) - 1] < x) {
+    prev = step;
+    step = step + 4;
+    if (prev >= n)
+      return -1;
+  }
+
+  while (arr[prev] < x) {
+    prev = prev + 1;
+
+    if (prev == min(step, n))
+      return -1;
+  }
+  if (arr[prev] == x)
+    return prev;
+
+  return -1;
+}
+
+int main() {
+  int index = jumpSearch();
+  write(index);
+  return 0;
+}

@@ -57,6 +57,7 @@ extern Node* root;
 // }
 
 int main(int argc, char **argv) {
+    // printf("%u %u\n", ext_hash("_t19"), ext_hash("_t25"));
     if(argc <= 2) {
         return 1;
     }
@@ -79,25 +80,29 @@ int main(int argc, char **argv) {
         if(!semantic_error) {
             if(has_array_as_param) {
                 printf("Cannot translate: Code contains variables of multi-dimensional array type or parameters of array type.\n");
-                return 0;
+                return 1;
             }
             InterCodes* ic = translate_ExtDefList(root->son);
             
-            FILE * f_output_ic = fopen(argv[2], "w");
-            if(!f_output_ic) {
+            // FILE * f_output_ic = fopen(argv[2], "w");
+            // if(!f_output_ic) {
+            //     perror(argv[2]);
+            //     return 1;
+            // }
+            // fprint_InterCodes(f_output_ic, ic);
+            
+            MipsCodes* mc = translate_ic(ic);
+            FILE* f_output_mc = fopen(argv[2], "w");
+            if(!f_output_mc) {
                 perror(argv[2]);
                 return 1;
             }
-            fprint_InterCodes(f_output_ic, ic);
-            
-            MipsCodes* mc = translate_ic(ic);
-            FILE* f_output_mc = fopen(argv[3], "w");
-            if(!f_output_mc) {
-                perror(argv[3]);
-                return 1;
-            }
             fprint_MipsCodes(f_output_mc, mc);
+        } else {
+            return semantic_error;
         }
+    } else {
+        return 1;
     }
     return 0;
 }
