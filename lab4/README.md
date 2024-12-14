@@ -1,19 +1,13 @@
 ## Usage
 
-Compile lab 3 with `make` at `./Code`, `parser` will be generated.
+Compile lab 4 with `make` at `./Code`, `parser` will be generated.
 
-Use `parser xxx.cmm yyy.ir` to run lex/syntax/semantic check for `xxx.cmm`, then generate intermediate code `yyy.ir`.
+Use `parser xxx.cmm yyy.s` to run lex/syntax/semantic check for `xxx.cmm`, then generate MIPS code `yyy.s`.
 
 ## Update Log
 
-**2024.11.15**
+**2024.12.14**
 
-Lab 3: Code Completed. Unknown bugs remain to fix.
+Lab 4: Code Completed. Unknown bugs remain to fix: Test B-3 TIMEOUT.
 
-Score: 94/100
-
-**2024.11.20**
-
-Lab 3: Code Completed. Previous bugs are caused by not handling the direct assignment between arrays.
-
-Score: 100/100
+Score: 92/100
