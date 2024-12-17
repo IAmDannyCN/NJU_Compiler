@@ -1,0 +1,27 @@
+int main() {
+    int g[50][50];
+    int n = read(), m = read();
+    int i, j;
+
+    i = 1;
+    while(i <= n) {
+        j = 1;
+        while(j <= m) {
+            g[i][j] = read();
+            j = j + 1;
+        }
+        i = i + 1;
+    }
+
+    i = 1;
+    while(i <= m) {
+        j = 1;
+        while(j <= n) {
+            write(g[j][i]);
+            j = j + 1;
+        }
+        i = i + 1;
+    }
+
+    return 0;
+}

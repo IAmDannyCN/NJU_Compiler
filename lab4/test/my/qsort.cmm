@@ -1,0 +1,61 @@
+int Output(int tooutput[1000], int sz) {
+    int oi = 1;
+    while(oi <= sz) {
+        write(tooutput[oi]);
+        oi = oi + 1;
+    }
+    return 0;
+}
+
+int swap(int toswap[1000], int swapi, int swapj) {
+    int swapival = toswap[swapi];
+    int swapjval = toswap[swapj];
+    toswap[swapi] = swapjval;
+    toswap[swapj] = swapival;
+    return 0;
+}
+
+int partition(int parr[1000], int low, int high) {
+    int pivot = parr[high];
+    int pi = low - 1;
+    int pj = low;
+
+    while(pj < high) {
+        if(parr[pj] < pivot) {
+            pi = pi + 1;
+            swap(parr, pi, pj);
+        }
+        pj = pj + 1;
+    }
+
+    swap(parr, pi + 1, high);
+    return pi + 1;
+}
+
+int quickSort(int qarr[1000], int l, int r) {
+    if(l < r) {
+        int pos = partition(qarr, l, r);
+
+        quickSort(qarr, l, pos - 1);
+        quickSort(qarr, pos + 1, r);
+    }
+    return 0;
+}
+
+int main() {
+    int n;
+    int arr[1000];
+    int i = 1;
+    
+    n = read();
+
+    while(i <= n) {
+        arr[i] = read();
+        i = i + 1;
+    }
+
+    quickSort(arr, 1, n);
+    Output(arr, n);
+
+    return 0;
+}

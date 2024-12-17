@@ -82,10 +82,10 @@ int main(int argc, char **argv) {
         define_Lib_Func();
         ExtDefList(root->son);
         if(!semantic_error) {
-            if(has_array_as_param) {
-                printf("Cannot translate: Code contains variables of multi-dimensional array type or parameters of array type.\n");
-                return 1;
-            }
+            // if(has_array_as_param) {
+            //     printf("Cannot translate: Code contains variables of multi-dimensional array type or parameters of array type.\n");
+            //     return 1;
+            // }
             InterCodes* ic = translate_ExtDefList(root->son);
             
             // FILE * f_output_ic = fopen(argv[2], "w");

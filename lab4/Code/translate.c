@@ -497,10 +497,10 @@ Offset_Query translate_Exp_Offset(Node* node, char* place) {
     // Example: j[c+10].ss[g*5].sb = 9;
     if(getSon(node, "LB") != NULL) {
         // Check for Multi-Dimensional
-        if(getSon(node->son, "LB")) {
-            printf("Cannot translate: Code contains variables of multi-dimensional array type or parameters of array type.\n");
-            exit(0);
-        }
+        // if(getSon(node->son, "LB")) {
+        //     printf("Cannot translate: Code contains variables of multi-dimensional array type or parameters of array type.\n");
+        //     exit(0);
+        // }
 
 
         Offset_Query info = translate_Exp_Offset(node->son, place);
