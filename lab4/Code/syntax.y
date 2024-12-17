@@ -21,7 +21,8 @@
 %type <type_node> Program ExtDefList ExtDef ExtDecList Specifier StructSpecifier OptTag Tag VarDec FunDec VarList ParamDec CompSt StmtList Stmt DefList Def DecList Dec Exp Args
 
 %right ASSIGNOP
-%left OR AND
+%left OR
+%left AND
 %left RELOP
 %left PLUS MINUS
 %left STAR DIV

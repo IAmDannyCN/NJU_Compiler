@@ -88,9 +88,9 @@ int main(int argc, char **argv) {
             // }
             InterCodes* ic = translate_ExtDefList(root->son);
             
-            // FILE * f_output_ic = fopen(argv[2], "w");
+            // FILE * f_output_ic = fopen(argv[3], "w");
             // if(!f_output_ic) {
-            //     perror(argv[2]);
+            //     perror(argv[3]);
             //     return 1;
             // }
             // fprint_InterCodes(f_output_ic, ic);

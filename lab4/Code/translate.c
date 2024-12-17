@@ -281,6 +281,7 @@ InterCodes* translate_Exp(Node* node, char* place) {
             Type* ty = querySymbol(id);
             if(ty->kind == BASIC) {
                 append_InterCode(RExp_codes, new_InterCode(IC_ASSIGN, node->son->son->content, tval));
+                append_InterCode(RExp_codes, new_InterCode(IC_ASSIGN, place, tval));
                 return RExp_codes;
             } else {
                 char* laddr = new_temp();

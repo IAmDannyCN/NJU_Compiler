@@ -11,3 +11,8 @@ Use `parser xxx.cmm yyy.s` to run lex/syntax/semantic check for `xxx.cmm`, then 
 Lab 4: Code Completed. Unknown bugs remain to fix: Test B-3 TIMEOUT.
 
 Score: 92/100
+
+**2024.12.17**
+Lab 4: Completed. Fixed bugs from lab 1 and lab 3.
+
+Score: 100/100

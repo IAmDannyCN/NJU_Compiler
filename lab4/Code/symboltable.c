@@ -1,8 +1,8 @@
 #include "symboltable.h"
 
-Type* structTable[262144];
-Type* symbolTable[262144];
-Function* funcTable[262144];
+Type* structTable[19260817];
+Type* symbolTable[19260817];
+Function* funcTable[19260817];
 
 unsigned int hash(char* name) {
     // unsigned int val = 0, i;
@@ -12,7 +12,7 @@ unsigned int hash(char* name) {
     // }
     // return val;
     unsigned int h = 0;
-    const unsigned int M = 262144;
+    const unsigned int M = 19260817;
     
     while (*name) {
         h = (h * 137 + (unsigned char)*name) % M;
