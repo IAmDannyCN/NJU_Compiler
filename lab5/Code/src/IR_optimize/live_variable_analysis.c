@@ -18,7 +18,8 @@ static void LiveVariableAnalysis_teardown(LiveVariableAnalysis *t) {
 static bool
 LiveVariableAnalysis_isForward (LiveVariableAnalysis *t) {
     // TODO: return isForward?;
-    TODO();
+    // TODO();
+    return false;
 }
 
 static Set_IR_var*
@@ -63,7 +64,8 @@ LiveVariableAnalysis_meetInto (LiveVariableAnalysis *t,
      * meet: union/intersect?
      * return VCALL(*target, union_with/intersect_with?, fact);
      */
-    TODO();
+    // TODO();
+    return VCALL(*target, union_with, fact);
 }
 
 void LiveVariableAnalysis_transferStmt (LiveVariableAnalysis *t,
@@ -87,7 +89,17 @@ void LiveVariableAnalysis_transferStmt (LiveVariableAnalysis *t,
      *      VCALL(*fact, insert/delete?, def); // kill/gen ?
      *  }
      */
-    TODO();
+    // TODO();
+    if(def != IR_VAR_NONE) { // 生成新def
+        VCALL(*fact, delete, def); // kill/gen ?
+    }
+    for(unsigned i = 0; i < use.use_cnt; i ++) {
+        IR_val use_val = use.use_vec[i];
+        if(!use_val.is_const) {
+            IR_var use = use_val.var;
+            VCALL(*fact, insert, use); // kill/gen ?
+        }
+    }
 }
 
 bool LiveVariableAnalysis_transferBlock (LiveVariableAnalysis *t,
@@ -126,6 +138,7 @@ void LiveVariableAnalysis_print_result(LiveVariableAnalysis *t, IR_function *fun
         printf("\n");
         printf("=================\n");
     }
+    printf("\n");
 }
 
 void LiveVariableAnalysis_init(LiveVariableAnalysis *t) {
@@ -166,7 +179,11 @@ static bool block_remove_dead_def (LiveVariableAnalysis *t, IR_block *blk) {
              *      updated = true;
              *  }
              */
-            TODO();
+            // TODO();
+            if(VCALL(*new_out_fact, exist, def) == false) {
+                stmt->dead = true;
+                updated = true;
+            }
         }
         LiveVariableAnalysis_transferStmt(t, stmt, new_out_fact);
     }

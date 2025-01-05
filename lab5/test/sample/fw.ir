@@ -1,0 +1,15 @@
+FUNCTION main :
+READ v1
+READ v2
+v3 := v1 + v2
+v4 := v1 + v2
+IF v1 < v2 GOTO L1
+v5 := v1 - v2
+GOTO L2
+LABEL L1 :
+v6 := v1 - v2
+LABEL L2 :
+v7 := v1 - v2
+WRITE v4
+WRITE v7
+RETURN #0

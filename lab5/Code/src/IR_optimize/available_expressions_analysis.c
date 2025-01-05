@@ -58,7 +58,8 @@ AvailableExpressionsAnalysis_newBoundaryFact (AvailableExpressionsAnalysis *t, I
      * OutFact[Entry] = (Bottom: empty set) / (Top: universal set) / other?
      * return NEW(Fact_set_var, is_top?);
      */
-    TODO();
+    // TODO();
+    return NEW(Fact_set_var, true);
 }
 
 static Fact_set_var*
@@ -68,7 +69,8 @@ AvailableExpressionsAnalysis_newInitialFact (AvailableExpressionsAnalysis *t) {
      * InitFact = (Bottom: empty set) / (Top: universal set) / other?
      * return NEW(Fact_set_var, is_top?);
      */
-    TODO();
+    // TODO();
+    return NEW(Fact_set_var, false);
 }
 
 static void
@@ -112,7 +114,8 @@ AvailableExpressionsAnalysis_meetInto (AvailableExpressionsAnalysis *t,
      * IN[blk] = union_with / intersect_with (all OUT[pred_blk]) ?
      * return VCALL(target->set, union_with / intersect_with, &fact->set);
      */
-    TODO();
+    // TODO();
+    return VCALL(target->set, union_with, &fact->set);
 }
 
 void AvailableExpressionsAnalysis_transferStmt (AvailableExpressionsAnalysis *t,
