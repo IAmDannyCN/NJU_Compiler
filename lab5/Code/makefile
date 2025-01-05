@@ -107,8 +107,7 @@ $(OBJ_DIR)/%.o: $(IR_PARSE_GENERATE_DIR)/%.c $(IR_SYNTAX_TAB_C)
 all: $(PARSER)
 
 clean:
-#	rm -rf $(BUILD_DIR) $(PARSER)
-	rm parser *.ir
+	rm -rf $(BUILD_DIR) $(PARSER)
 
 build: all
 

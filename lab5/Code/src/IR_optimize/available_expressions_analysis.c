@@ -70,7 +70,8 @@ AvailableExpressionsAnalysis_newInitialFact (AvailableExpressionsAnalysis *t) {
      * return NEW(Fact_set_var, is_top?);
      */
     // TODO();
-    return NEW(Fact_set_var, false);
+    Fact_set_var* tmp = NEW(Fact_set_var, true);
+    return tmp;
 }
 
 static void
@@ -115,7 +116,7 @@ AvailableExpressionsAnalysis_meetInto (AvailableExpressionsAnalysis *t,
      * return VCALL(target->set, union_with / intersect_with, &fact->set);
      */
     // TODO();
-    return VCALL(target->set, union_with, &fact->set);
+    return VCALL(target->set, intersect_with, &fact->set);
 }
 
 void AvailableExpressionsAnalysis_transferStmt (AvailableExpressionsAnalysis *t,

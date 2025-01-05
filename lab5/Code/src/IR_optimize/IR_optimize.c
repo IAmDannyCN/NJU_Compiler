@@ -51,12 +51,12 @@ void IR_optimize() {
 
             //// Available Expressions Analysis
 
-            availableExpressionsAnalysis = NEW(AvailableExpressionsAnalysis);
-            AvailableExpressionsAnalysis_merge_common_expr(availableExpressionsAnalysis, func);
-            worklist_solver((DataflowAnalysis*)availableExpressionsAnalysis, func); // 将子类强制转化为父类
+            // availableExpressionsAnalysis = NEW(AvailableExpressionsAnalysis);
+            // AvailableExpressionsAnalysis_merge_common_expr(availableExpressionsAnalysis, func);
+            // worklist_solver((DataflowAnalysis*)availableExpressionsAnalysis, func); // 将子类强制转化为父类
             // VCALL(*availableExpressionsAnalysis, printResult, func);
-            AvailableExpressionsAnalysis_remove_available_expr_def(availableExpressionsAnalysis, func);
-            DELETE(availableExpressionsAnalysis);
+            // AvailableExpressionsAnalysis_remove_available_expr_def(availableExpressionsAnalysis, func);
+            // DELETE(availableExpressionsAnalysis);
 
             //// Copy Propagation
 
